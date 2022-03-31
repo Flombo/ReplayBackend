@@ -35,7 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _a = require('mongodb'), MongoClient = _a.MongoClient, ServerApiVersion = _a.ServerApiVersion;
-var uri = "mongodb+srv://vrreplay:52AT6XsSKMLYJ49K@cluster0.b4g93.mongodb.net/replays?retryWrites=true&w=majority";
+require('dotenv').config();
+var uri = process.env.MONGODB;
 var client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 // const { DateTime } = require("luxon");
 var MongoDBHandler = /** @class */ (function () {

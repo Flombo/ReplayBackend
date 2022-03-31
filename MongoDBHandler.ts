@@ -1,5 +1,6 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://vrreplay:52AT6XsSKMLYJ49K@cluster0.b4g93.mongodb.net/replays?retryWrites=true&w=majority";
+require('dotenv').config();
+const uri = process.env.MONGODB;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 // const { DateTime } = require("luxon");
 
