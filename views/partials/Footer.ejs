@@ -1,0 +1,9 @@
+<footer>
+    <form action="/" method="get" id="paginationSelection">
+        <%for(let i = page; i <= pageMax; i++){%>
+            <%if(i % 6 !== 0) {%>
+                <button><%-i%></button>
+            <%} else { break; }%>
+        <%}%>
+    </form>
+</footer>

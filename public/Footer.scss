@@ -1,0 +1,27 @@
+@import "variables";
+
+footer {
+    bottom: 0;
+    width: 100%;
+    background-color: $foregroundColor;
+    display: flex;
+    flex-direction: row;
+    height: 5%;
+
+    form {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        align-self: center;
+        justify-content: space-evenly;
+        margin: 0;
+
+        button {
+            background-color: $backgroundColor;
+            border: none;
+            cursor: pointer;
+            color: $foregroundColor;
+            width: 10%;
+        }
+    }
+}

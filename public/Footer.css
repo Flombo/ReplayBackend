@@ -1,0 +1,13 @@
+footer {
+  bottom: 0;
+}
+footer button {
+  background-color: #ff;
+  border: none;
+  cursor: pointer;
+  color: #252525;
+  width: 5%;
+  height: 5%;
+}
+
+/*# sourceMappingURL=Footer.css.map */

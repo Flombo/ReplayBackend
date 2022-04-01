@@ -1,1 +1,13 @@
-<h1>Xallo</h1>
+<html lang="EN">
+    <head>
+        <title>Replay-Management</title>
+        <link rel="stylesheet" href="public/Index.css">
+    </head>
+    <body>
+        <%- include('./partials/navBar.ejs'); %>
+        <%- replayHTML %>
+        <%if(error !== undefined && error !== null) {%>
+        <%}%>
+        <%- include('./partials/Footer.ejs', {"page" : page, "pageMax" : pageMax}); %>
+    </body>
+</html>

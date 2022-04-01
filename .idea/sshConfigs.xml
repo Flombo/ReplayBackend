@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig host="192.52.42.216" id="ab32c72c-a482-45e1-b03a-0ddeb32fa845" keyPath="C:\Users\flori\WebstormProjects\ReplaySystemBackend\replays.pem" port="22" nameFormat="DESCRIPTIVE" username="debian" />
+    </configs>
+  </component>
+</project>

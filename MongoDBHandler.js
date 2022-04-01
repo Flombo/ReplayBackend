@@ -42,6 +42,7 @@ var client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: t
 var MongoDBHandler = /** @class */ (function () {
     function MongoDBHandler() {
         this.mongoDBConnection = null;
+        this.pageSize = 20;
         if (this.mongoDBConnection === null || this.mongoDBConnection === undefined) {
             this.createMongoDBConnection();
         }
@@ -80,13 +81,19 @@ var MongoDBHandler = /** @class */ (function () {
                     return [2 /*return*/, this.mongoDBConnection.db(dbName).collection(collectionName).insertMany(replay)];
                 }
                 catch (exception) {
-                    console.log(exception);
+                    console.error(exception);
                     return [2 /*return*/, {}];
                 }
                 return [2 /*return*/];
             });
         });
     };
+    /**
+     * Returns an array of replays for the given replay-name.
+     * @param dbName
+     * @param collectionName
+     * @param name
+     */
     MongoDBHandler.prototype.retrieveReplays = function (dbName, collectionName, name) {
         return __awaiter(this, void 0, void 0, function () {
             var result;
@@ -96,10 +103,51 @@ var MongoDBHandler = /** @class */ (function () {
                     return [2 /*return*/, result.toArray()];
                 }
                 catch (exception) {
-                    console.log(exception);
-                    return [2 /*return*/, '[]'];
+                    console.error(exception);
+                    return [2 /*return*/, []];
                 }
                 return [2 /*return*/];
+            });
+        });
+    };
+    MongoDBHandler.prototype.retrieveAllReplays = function (dbName, collectionName, page) {
+        if (page === void 0) { page = 1; }
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                try {
+                    result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate([
+                        { $match: {} },
+                        { $skip: (page - 1) * this.pageSize },
+                        { $limit: this.pageSize }
+                    ]);
+                    return [2 /*return*/, result.toArray()];
+                }
+                catch (exception) {
+                    console.error(exception);
+                    return [2 /*return*/, []];
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    MongoDBHandler.prototype.getPageMax = function (dbName, collectionName) {
+        return __awaiter(this, void 0, void 0, function () {
+            var documentsCount, exception_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.mongoDBConnection.db(dbName).collection(collectionName).countDocuments()];
+                    case 1:
+                        documentsCount = _a.sent();
+                        return [2 /*return*/, Math.floor(documentsCount / this.pageSize)];
+                    case 2:
+                        exception_2 = _a.sent();
+                        console.error(exception_2);
+                        return [2 /*return*/, 0];
+                    case 3: return [2 /*return*/];
+                }
             });
         });
     };
