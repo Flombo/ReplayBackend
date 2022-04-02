@@ -1,0 +1,16 @@
+<nav>
+    <form action="/search" method="post" class="searchForm">
+        <input name="searchString" type="search" placeholder="Search by name or tag"/>
+        <button type="submit">🔍</button>
+    </form>
+    <form action="/filter" method="get" class="filterForm">
+        <select>
+            <option>Timestamp (ASC)</option>
+            <option>Timestamp (DESC)</option>
+        </select>
+        <button>🕐</button>
+    </form>
+    <button id="themeButton" class="lightmode">
+        <img src="../../public/icons/LightModeIcon.svg" alt="image for the mode button">
+    </button>
+</nav>

@@ -54,6 +54,44 @@ class MongoDBHandler {
         }
     }
 
+    /**
+     * @param dbName
+     * @param collectionName
+     * @param searchString
+     * @param page
+     */
+    public async searchReplaysByNameOrToken(dbName : string, collectionName : string, searchString : string, page : number = 1) {
+        try {
+            const regEx = new RegExp('.*' + searchString + '.*');
+            const result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate(
+                [
+                    {
+                        $match: {
+                            $or: [
+                                    {
+                                        name: regEx
+                                    },
+                                    {
+                                        tag: regEx
+                                    }
+                                ]
+                        }
+                    },
+                    {
+                        $skip: (page - 1) * this.pageSize
+                    },
+                    {
+                        $limit: this.pageSize
+                    }
+                    ]
+            ).sort({timestamp: 1});
+            return result.toArray();
+        } catch (exception) {
+            console.error(exception);
+            throw exception;
+        }
+    }
+
     public async retrieveAllReplays(dbName : string, collectionName :  string, page: number = 1) {
         try {
             const result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate([

@@ -1,0 +1,1 @@
+export default errorMsg => `<div class="error">${errorMsg}</div>`;

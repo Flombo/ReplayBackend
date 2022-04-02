@@ -10,14 +10,12 @@ const server = http.createServer(app);
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname));
 const databaseName = 'replays';
-const page = 1;
 
 app.get('/', async(req, res) => {
     try {
         const replays = await MongoDBHandler.retrieveAllReplays(databaseName, databaseName);
         const replayHTML = ReplayBuilder.buildReplays(replays);
-        const pageMax = await MongoDBHandler.getPageMax(databaseName, databaseName);
-        res.render('index.ejs', {replayHTML: replayHTML, page: page, pageMax: pageMax, error: null});
+        res.render('index.ejs', {replayHTML: replayHTML, page: 1, pageMax: 6, error: null});
     } catch (exception) {
         console.error(exception);
     }
@@ -39,8 +37,60 @@ app.get('/replays', async(req, res) => {
     res.json(result);
 });
 
-app.get('/search', async(req, res) => {
-   res.render('index.ejs');
+app.post('/pagination', async(req, res) => {
+    try {
+        const pageInfo = req.body.pageInfo;
+        const currentPage = req.body.currentPage;
+        const nextPage = await calculateNextPage(pageInfo, currentPage);
+        const replays = await MongoDBHandler.retrieveAllReplays(databaseName, databaseName, nextPage);
+        const replayHTML = ReplayBuilder.buildReplays(replays);
+        const pageMax = await MongoDBHandler.getPageMax(databaseName, databaseName);
+        let paginationEnd = nextPage + 6 >= pageMax ? pageMax : nextPage + 6;
+
+        res.status(200).json({replayHTML: replayHTML, page: nextPage, paginationEnd: paginationEnd});
+    } catch (exception) {
+        console.error(exception);
+        res.status(500).json();
+    }
+});
+
+async function calculateNextPage(pageInfo, currentPage) {
+    const pageMax = await MongoDBHandler.getPageMax(databaseName, databaseName);
+    let nextPage = currentPage;
+
+    if(isNaN(pageInfo.charAt(0))) {
+        if (pageInfo === '+1' && currentPage < pageMax) {
+            nextPage++;
+        }
+
+        if (pageInfo === '-1' && currentPage > 1) {
+            nextPage--;
+        }
+
+        if(pageInfo === 'end') {
+            nextPage = pageMax;
+        }
+
+        if(pageInfo === 'start') {
+            nextPage = 1;
+        }
+    } else {
+        nextPage = pageInfo;
+    }
+
+    return nextPage;
+}
+
+app.post('/search', async(req, res) => {
+   try {
+        const searchString = req.body.searchString;
+        const replays = await MongoDBHandler.searchReplaysByNameOrToken(databaseName, databaseName, searchString);
+        const replayHTML = ReplayBuilder.buildReplays(replays);
+        res.status(200).json({replayHTML: replayHTML});
+   } catch (exception) {
+        console.error(exception);
+        res.status(500).json({error: exception});
+   }
 });
 
 app.get('/filter', async(req, res) => {

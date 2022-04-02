@@ -1,10 +1,11 @@
-<html lang="EN">
+<html lang="EN" class="lightmode">
     <head>
         <title>Replay-Management</title>
-        <link rel="stylesheet" href="public/Index.css">
+        <link rel="stylesheet" href="../public/styles/Index.css">
+        <script src="../public/js/ScriptLoader.js" type="module"></script>
     </head>
     <body>
-        <%- include('./partials/navBar.ejs'); %>
+        <%- include('./partials/NavBar.ejs'); %>
         <%- replayHTML %>
         <%if(error !== undefined && error !== null) {%>
         <%}%>

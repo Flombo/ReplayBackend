@@ -110,6 +110,49 @@ var MongoDBHandler = /** @class */ (function () {
             });
         });
     };
+    /**
+     * @param dbName
+     * @param collectionName
+     * @param searchString
+     * @param page
+     */
+    MongoDBHandler.prototype.searchReplaysByNameOrToken = function (dbName, collectionName, searchString, page) {
+        if (page === void 0) { page = 1; }
+        return __awaiter(this, void 0, void 0, function () {
+            var regEx, result;
+            return __generator(this, function (_a) {
+                try {
+                    regEx = new RegExp('.*' + searchString + '.*');
+                    result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate([
+                        {
+                            $match: {
+                                $or: [
+                                    {
+                                        name: regEx
+                                    },
+                                    {
+                                        tag: regEx
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            $skip: (page - 1) * this.pageSize
+                        },
+                        {
+                            $limit: this.pageSize
+                        }
+                    ]).sort({ timestamp: 1 });
+                    return [2 /*return*/, result.toArray()];
+                }
+                catch (exception) {
+                    console.error(exception);
+                    throw exception;
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
     MongoDBHandler.prototype.retrieveAllReplays = function (dbName, collectionName, page) {
         if (page === void 0) { page = 1; }
         return __awaiter(this, void 0, void 0, function () {

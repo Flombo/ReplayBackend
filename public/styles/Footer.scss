@@ -3,12 +3,12 @@
 footer {
     bottom: 0;
     width: 100%;
-    background-color: $foregroundColor;
+    position: fixed;
     display: flex;
     flex-direction: row;
     height: 5%;
 
-    form {
+    #paginationForm {
         width: 100%;
         display: flex;
         align-items: center;
@@ -16,12 +16,15 @@ footer {
         justify-content: space-evenly;
         margin: 0;
 
-        button {
-            background-color: $backgroundColor;
+        .paginationButton {
             border: none;
             cursor: pointer;
-            color: $foregroundColor;
             width: 10%;
+            visibility: visible;
+
+            &.invisible {
+                visibility: hidden;
+            }
         }
     }
 }

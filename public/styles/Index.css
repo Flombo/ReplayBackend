@@ -1,0 +1,244 @@
+nav {
+  margin: 0;
+  width: 100%;
+  height: 5%;
+  padding-bottom: 1%;
+  padding-top: 1%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  position: fixed;
+  top: 0;
+}
+nav form {
+  min-width: 15%;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  background-color: white;
+  justify-content: center;
+  border-radius: 5px;
+}
+nav form input {
+  align-self: center;
+  border: none;
+  width: 75%;
+  height: 80%;
+}
+nav form select {
+  cursor: pointer;
+  border: none;
+  align-self: center;
+  width: 75%;
+  height: 80%;
+}
+nav form button {
+  border: none;
+  cursor: pointer;
+  opacity: 1;
+  height: 80%;
+  align-self: center;
+}
+nav #themeButton {
+  min-width: 15%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+nav #themeButton img {
+  width: 15%;
+}
+
+@media screen and (max-width: 800px) {
+  nav {
+    padding-bottom: 0;
+  }
+  nav form {
+    height: 80%;
+  }
+  nav #themeButton {
+    min-width: 15%;
+    max-width: 15%;
+  }
+  nav #themeButton img {
+    width: 50%;
+  }
+}
+footer {
+  bottom: 0;
+  width: 100%;
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  height: 5%;
+}
+footer #paginationForm {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  align-self: center;
+  justify-content: space-evenly;
+  margin: 0;
+}
+footer #paginationForm .paginationButton {
+  border: none;
+  cursor: pointer;
+  width: 10%;
+  visibility: visible;
+}
+footer #paginationForm .paginationButton.invisible {
+  visibility: hidden;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  top: 0;
+  background-color: #252525;
+  transition-duration: 0.5s;
+  transition-property: background-color;
+  transition-timing-function: ease-in-out;
+}
+html body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  top: 0;
+}
+html body nav {
+  background-color: #fff;
+  color: #252525;
+}
+html body nav form {
+  background-color: #252525;
+  border: solid #252525 1px;
+}
+html body nav form input {
+  background-color: #252525;
+  color: #fff;
+}
+html body nav form input::placeholder {
+  color: #fff;
+}
+html body nav form select {
+  background-color: #252525;
+  color: #fff;
+}
+html body nav form button {
+  background-color: #252525;
+}
+html body nav #themeButton {
+  background-color: #fff;
+}
+html body button {
+  border: none;
+  background-color: #252525;
+  cursor: pointer;
+  opacity: 1;
+}
+html body button:hover {
+  opacity: 0.5;
+}
+html body .replayContainer {
+  margin-top: 5%;
+  width: 100%;
+  min-height: 83%;
+  max-height: 83%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+html body .replayContainer .replay {
+  margin: 1%;
+  width: 85%;
+  padding: 1%;
+  border: 5px solid #fff;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 20px;
+  transition-duration: 0.5s;
+  transition-property: background-color;
+  transition-timing-function: ease-in-out;
+}
+html body .replayContainer .replay button {
+  transition-duration: 0.5s;
+  transition-property: background-color;
+  transition-timing-function: ease-in-out;
+}
+html body .replayContainer .error {
+  border-radius: 5px;
+  border: solid 5px salmon;
+  color: #fff;
+  background-color: #252525;
+  width: 85%;
+  min-height: 82%;
+  padding: 1%;
+  text-align: center;
+}
+html body footer {
+  background-color: #fff;
+}
+html body footer #paginationForm .paginationButton {
+  background-color: #fff;
+  color: #252525;
+}
+html.lightmode {
+  background-color: #fff;
+}
+html.lightmode body nav {
+  background-color: #252525;
+  color: #fff;
+}
+html.lightmode body nav form {
+  background-color: #fff;
+  border: solid #fff 1px;
+}
+html.lightmode body nav form button {
+  background-color: #fff;
+}
+html.lightmode body nav form input {
+  background-color: #fff;
+  color: #252525;
+}
+html.lightmode body nav form input::placeholder {
+  color: #252525;
+}
+html.lightmode body nav form select {
+  background-color: #fff;
+  color: #252525;
+}
+html.lightmode body nav #themeButton {
+  background-color: #252525;
+}
+html.lightmode body button {
+  background-color: #fff;
+}
+html.lightmode body .replayContainer .replay {
+  border: 5px solid #252525;
+  color: #252525;
+}
+html.lightmode body .replayContainer .error {
+  color: #252525;
+  background-color: #fff;
+}
+html.lightmode body footer {
+  background-color: #252525;
+}
+html.lightmode body footer #paginationForm .paginationButton {
+  background-color: #252525;
+  color: #fff;
+}
+
+@media screen and (max-width: 1000px) {
+  html body .replayContainer {
+    margin-top: 15%;
+  }
+  html body .replayContainer .replay {
+    font-size: 15px;
+  }
+}
+
+/*# sourceMappingURL=Index.css.map */

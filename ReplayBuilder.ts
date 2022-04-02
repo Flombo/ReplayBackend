@@ -8,7 +8,12 @@ class ReplayBuilder {
         let replayHTML = '<div class="replayContainer">';
 
         replays.map(replay => {
-            replayHTML += `<div class="replay"><div>${replay.name}</div><div>${replay.timestamp}</div><button class="more">➕</button></div>`
+            replayHTML += `<div class="replay" title="${replay._id}">`
+                            + `<div>${replay.name}</div>`
+                            + `<div>${replay.tag}</div>`
+                            + `<div>${replay.timestamp}</div>`
+                            + `<button class="more">➕</button>`
+                           + `</div>`
         });
 
         replayHTML += '</div>';

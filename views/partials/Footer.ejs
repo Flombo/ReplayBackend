@@ -1,9 +1,19 @@
 <footer>
-    <form action="/" method="get" id="paginationSelection">
-        <%for(let i = page; i <= pageMax; i++){%>
-            <%if(i % 6 !== 0) {%>
-                <button><%-i%></button>
-            <%} else { break; }%>
+    <form action="/pagination" method="POST" id="paginationForm">
+        <button id="startButton" class="paginationButton">Start</button>
+        <%if(page > 1){%>
+            <button id="previousButton" class="paginationButton">Previous</button>
+        <%} else {%>
+            <button id="previousButton" class="paginationButton invisible">Previous</button>
         <%}%>
+        <%for(let i = page; i <= pageMax; i++){%>
+            <button class="paginationButton"><%-i%></button>
+        <%}%>
+        <%if(page < pageMax){%>
+            <button id="forwardsButton" class="paginationButton">Forwards</button>
+        <%} else {%>
+            <button id="forwardsButton" class="paginationButton invisible">Forwards</button>
+        <%}%>
+        <button id="endButton" class="paginationButton">End</button>
     </form>
 </footer>

@@ -8,7 +8,12 @@ var ReplayBuilder = /** @class */ (function () {
     ReplayBuilder.buildReplays = function (replays) {
         var replayHTML = '<div class="replayContainer">';
         replays.map(function (replay) {
-            replayHTML += "<div class=\"replay\"><div>" + replay.name + "</div><div>" + replay.timestamp + "</div><button class=\"more\">\u2795</button></div>";
+            replayHTML += "<div class=\"replay\" title=\"" + replay._id + "\">"
+                + ("<div>" + replay.name + "</div>")
+                + ("<div>" + replay.tag + "</div>")
+                + ("<div>" + replay.timestamp + "</div>")
+                + "<button class=\"more\">\u2795</button>"
+                + "</div>";
         });
         replayHTML += '</div>';
         return replayHTML;
