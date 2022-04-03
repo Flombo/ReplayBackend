@@ -64,8 +64,6 @@ html {
         .replayContainer {
             margin-top: 5%;
             width: 100%;
-            min-height: 83%;
-            max-height: 83%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -73,9 +71,9 @@ html {
             .replay {
                 margin: 1%;
                 width: $replayWidth;
-                padding: 1%;
                 border: 5px solid $backgroundColor;
                 display: flex;
+                flex-direction: column;
                 justify-content: space-between;
                 border-radius: 5px;
                 color: $backgroundColor;
@@ -84,10 +82,48 @@ html {
                 transition-property: background-color;
                 transition-timing-function: ease-in-out;
 
-                button {
+                .replayHeader {
+
+                    display: flex;
+                    flex-direction: row;
+                    width: 100%;
+                    justify-content: space-between;
+                    color: $foregroundColor;
+                    background-color: $backgroundColor;
+                    padding-bottom: 1%;
+                    padding-top: 1%;
                     transition-duration: 0.5s;
                     transition-property: background-color;
                     transition-timing-function: ease-in-out;
+
+                    button {
+                        background-color: $backgroundColor;
+                        transition-duration: 0.5s;
+                        transition-property: background-color;
+                        transition-timing-function: ease-in-out;
+                    }
+                }
+
+                .replayDetails {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-evenly;
+                    width: 100%;
+                    background-color: $foregroundColor;
+                    color: $backgroundColor;
+                    transition-duration: 0.5s;
+                    transition-property: background-color;
+                    transition-timing-function: ease-in-out;
+
+                    div {
+                        align-self: center;
+                    }
+                }
+
+                &.more {
+                    .replayDetails {
+                        display: none;
+                    }
                 }
             }
 
@@ -161,6 +197,20 @@ html {
                 .replay {
                     border: 5px solid $foregroundColor;
                     color: $foregroundColor;
+
+                    .replayHeader {
+                        color: $backgroundColor;
+                        background-color: $foregroundColor;
+
+                        button {
+                            background-color: $foregroundColor;
+                        }
+                    }
+
+                    .replayDetails {
+                        background-color: $backgroundColor;
+                        color: $foregroundColor;
+                    }
                 }
 
                 .error {

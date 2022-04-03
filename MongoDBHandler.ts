@@ -1,3 +1,5 @@
+import {ObjectId} from "mongodb";
+
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 const uri = process.env.MONGODB;
@@ -51,6 +53,16 @@ class MongoDBHandler {
         } catch (exception) {
             console.error(exception);
             return [];
+        }
+    }
+
+    public async retrieveReplayDetails(dbName : string, collectionName : string, replayID : string) {
+        try {
+            const findCursor = this.mongoDBConnection.db(dbName).collection(collectionName).find({_id: new ObjectId(replayID)});
+            return findCursor.next();
+        } catch (exception) {
+            console.error(exception);
+            throw exception;
         }
     }
 

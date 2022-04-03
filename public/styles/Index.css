@@ -67,7 +67,6 @@ nav #themeButton img {
 footer {
   bottom: 0;
   width: 100%;
-  position: fixed;
   display: flex;
   flex-direction: row;
   height: 5%;
@@ -143,8 +142,6 @@ html body button:hover {
 html body .replayContainer {
   margin-top: 5%;
   width: 100%;
-  min-height: 83%;
-  max-height: 83%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -152,9 +149,9 @@ html body .replayContainer {
 html body .replayContainer .replay {
   margin: 1%;
   width: 85%;
-  padding: 1%;
   border: 5px solid #fff;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   border-radius: 5px;
   color: #fff;
@@ -163,10 +160,41 @@ html body .replayContainer .replay {
   transition-property: background-color;
   transition-timing-function: ease-in-out;
 }
-html body .replayContainer .replay button {
+html body .replayContainer .replay .replayHeader {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+  color: #252525;
+  background-color: #fff;
+  padding-bottom: 1%;
+  padding-top: 1%;
   transition-duration: 0.5s;
   transition-property: background-color;
   transition-timing-function: ease-in-out;
+}
+html body .replayContainer .replay .replayHeader button {
+  background-color: #fff;
+  transition-duration: 0.5s;
+  transition-property: background-color;
+  transition-timing-function: ease-in-out;
+}
+html body .replayContainer .replay .replayDetails {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  width: 100%;
+  background-color: #252525;
+  color: #fff;
+  transition-duration: 0.5s;
+  transition-property: background-color;
+  transition-timing-function: ease-in-out;
+}
+html body .replayContainer .replay .replayDetails div {
+  align-self: center;
+}
+html body .replayContainer .replay.more .replayDetails {
+  display: none;
 }
 html body .replayContainer .error {
   border-radius: 5px;
@@ -218,6 +246,17 @@ html.lightmode body button {
 }
 html.lightmode body .replayContainer .replay {
   border: 5px solid #252525;
+  color: #252525;
+}
+html.lightmode body .replayContainer .replay .replayHeader {
+  color: #fff;
+  background-color: #252525;
+}
+html.lightmode body .replayContainer .replay .replayHeader button {
+  background-color: #252525;
+}
+html.lightmode body .replayContainer .replay .replayDetails {
+  background-color: #fff;
   color: #252525;
 }
 html.lightmode body .replayContainer .error {
