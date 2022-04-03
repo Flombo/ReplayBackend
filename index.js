@@ -9,7 +9,7 @@ const ReplayBuilder = require("./ReplayBuilder.js");
 const server = http.createServer(app);
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname));
-const databaseName = 'replays';
+const databaseName = process.env.MONGODBDATABASE;
 
 app.get('/', async(req, res) => {
     try {
