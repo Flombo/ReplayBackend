@@ -42,10 +42,12 @@ app.post('/pagination', async(req, res) => {
     try {
         const pageInfo = req.body.pageInfo;
         const currentPage = req.body.currentPage;
-        const nextPage = await calculateNextPage(pageInfo, currentPage);
-        const replays = await MongoDBHandler.retrieveAllReplays(databaseName, databaseName, nextPage);
+        const searchString = req.body.searchString;
+        const timestampFilter = req.body.timestampFilter;
+        const nextPage = await calculateNextPage(pageInfo, currentPage, searchString);
+        const replays = await MongoDBHandler.retrieveAllReplays(databaseName, databaseName, nextPage, searchString, timestampFilter);
         const replayHTML = ReplayBuilder.buildReplays(replays);
-        const pageMax = await MongoDBHandler.getPageMax(databaseName, databaseName);
+        const pageMax = await MongoDBHandler.getPageMax(databaseName, databaseName, searchString);
         let paginationEnd = nextPage + 6 >= pageMax ? pageMax : nextPage + 6;
 
         res.status(200).json({replayHTML: replayHTML, page: nextPage, paginationEnd: paginationEnd});
@@ -55,35 +57,34 @@ app.post('/pagination', async(req, res) => {
     }
 });
 
-async function calculateNextPage(pageInfo, currentPage) {
-    const pageMax = await MongoDBHandler.getPageMax(databaseName, databaseName);
-    let nextPage = currentPage;
+async function calculateNextPage(pageInfo, currentPage, searchString) {
+    const pageMax = await MongoDBHandler.getPageMax(databaseName, databaseName, searchString);
 
     if(pageInfo === undefined) {
         throw 'pageInfo undefined';
     }
 
-    if(isNaN(pageInfo.charAt(0))) {
-        if (pageInfo === '+1' && currentPage < pageMax) {
-            nextPage++;
+    if(isNaN(pageInfo) && isNaN(pageInfo.charAt(0))) {
+        if (pageInfo === 'forwards' &&  currentPage + 1 <= pageMax) {
+            currentPage++;
         }
 
-        if (pageInfo === '-1' && currentPage > 1) {
-            nextPage--;
+        if (pageInfo === 'previous' && currentPage - 1 >= 1) {
+            currentPage--;
         }
 
         if(pageInfo === 'end') {
-            nextPage = pageMax;
+            currentPage = pageMax;
         }
 
         if(pageInfo === 'start') {
-            nextPage = 1;
+            currentPage = 1;
         }
     } else {
-        nextPage = pageInfo;
+        currentPage = pageInfo;
     }
 
-    return nextPage;
+    return currentPage;
 }
 
 app.post('/getreplaydetails', async(req, res) => {
@@ -97,18 +98,6 @@ app.post('/getreplaydetails', async(req, res) => {
         console.error(exception);
         res.status(500).json({error: exception.message});
     }
-});
-
-app.post('/search', async(req, res) => {
-   try {
-        const searchString = req.body.searchString;
-        const replays = await MongoDBHandler.searchReplaysByNameOrToken(databaseName, databaseName, searchString);
-        const replayHTML = ReplayBuilder.buildReplays(replays);
-        res.status(200).json({replayHTML: replayHTML});
-   } catch (exception) {
-        console.error(exception);
-        res.status(500).json({error: exception.message});
-   }
 });
 
 app.get('/filter', async(req, res) => {

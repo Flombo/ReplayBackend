@@ -12,6 +12,10 @@ class PaginationHandler {
         this.forwardsButton = document.getElementById('forwardsButton');
         this.startButton = document.getElementById('startButton');
         this.endButton = document.getElementById('endButton');
+        this.searchForm = document.getElementsByClassName('searchForm')[0];
+        this.searchBar = this.searchForm.getElementsByTagName('input')[0];
+        this.filterForm = document.getElementsByClassName('filterForm')[0];
+        this.timestampFilter = this.filterForm.getElementsByTagName('select')[0];
     }
 
     async initHandling() {
@@ -28,8 +32,23 @@ class PaginationHandler {
         this.previousButton.addEventListener('click', () => this.onClickControlButton(this.previousButton));
         this.forwardsButton.addEventListener('click', () => this.onClickControlButton(this.forwardsButton));
         this.endButton.addEventListener('click', () => this.onClickControlButton(this.endButton));
-
+        this.initSearchBar();
+        this.initFilterHandling();
         await this.loadLastPaginationSettings();
+    }
+
+    initSearchBar() {
+        this.searchForm.addEventListener('submit', async(event) => {
+            event.preventDefault();
+            await this.sendPaginationRequest(1);
+        });
+    }
+
+    initFilterHandling() {
+        this.filterForm.addEventListener('submit', async(event) => {
+            event.preventDefault();
+            await this.sendPaginationRequest(1);
+        });
     }
 
     async loadLastPaginationSettings() {
@@ -52,10 +71,10 @@ class PaginationHandler {
                 pageInfo = 'start';
                 break;
             case 'previousButton':
-                pageInfo = '-1';
+                pageInfo = 'previous';
                 break;
             case 'forwardsButton':
-                pageInfo = '+1';
+                pageInfo = 'forwards';
                 break;
             case 'endButton':
                 pageInfo = 'end';
@@ -68,21 +87,25 @@ class PaginationHandler {
     async sendPaginationRequest(pageInfo) {
         try {
             const currentPage = this.paginationButtons[0].textContent;
+            const searchString = this.searchBar.value;
+            const timestampFilter = this.timestampFilter.value;
 
             const data = {
                 pageInfo: pageInfo,
-                currentPage: currentPage
+                currentPage: currentPage,
+                searchString: searchString,
+                timestampFilter: timestampFilter
             };
 
             const requestOptions = RequestBuilder(data);
             const response = await fetch('/pagination', requestOptions);
+            let replayJSON = await response.json();
 
             if(response.status !== 200) {
-                throw 'Pagination failed';
+                throw replayJSON.error;
             }
 
-            let replayJSON = await response.json();
-            this.updatePaginationButtons(replayJSON.page, replayJSON.paginationEnd);
+            this.updatePaginationButtons(parseInt(replayJSON.page), parseInt(replayJSON.paginationEnd));
             localStorage.setItem('currentPage', replayJSON.page);
             return replayJSON.replayHTML;
         } catch (exception) {
@@ -94,14 +117,26 @@ class PaginationHandler {
         this.updateForwardsButton(page, paginationEnd);
         this.updatePreviousButton(page);
 
-        for (let i = 0; i < this.paginationButtons.length; i++) {
-            this.paginationButtons[i].textContent = parseInt(page) + i;
+        if(page >= paginationEnd) {
+            let decrementFactor = 0;
+            for(let i = this.paginationButtons.length - 1; i >= 0; i--) {
+                this.paginationButtons[i].textContent = paginationEnd + decrementFactor;
+                decrementFactor--;
+            }
+        } else {
+            for (let i = 0; i < this.paginationButtons.length; i++) {
+                if(page + i <= paginationEnd) {
+                    this.paginationButtons[i].textContent = page + i;
+                } else {
+                    this.paginationButtons[i].textContent = paginationEnd;
+                }
+            }
         }
 
     }
 
     updateForwardsButton(page, paginationEnd) {
-        if(page !== paginationEnd) {
+        if(parseInt(page) !== parseInt(paginationEnd)) {
             this.forwardsButton.classList.remove('invisible');
         } else {
             this.forwardsButton.classList.add('invisible');

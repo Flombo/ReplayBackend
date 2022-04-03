@@ -21,7 +21,7 @@ class MongoDBHandler {
         try {
             this.mongoDBConnection = await client.connect();
         } catch (exception) {
-            console.log(exception);
+            console.error(exception);
         }
     }
 
@@ -66,37 +66,26 @@ class MongoDBHandler {
         }
     }
 
-    /**
-     * @param dbName
-     * @param collectionName
-     * @param searchString
-     * @param page
-     */
-    public async searchReplaysByNameOrToken(dbName : string, collectionName : string, searchString : string, page : number = 1) {
+    public async retrieveAllReplays(dbName : string, collectionName :  string, page: number = 1, searchString : string, timestampFilter : string) {
         try {
             const regEx = new RegExp('.*' + searchString + '.*');
-            const result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate(
-                [
-                    {
-                        $match: {
-                            $or: [
-                                    {
-                                        name: regEx
-                                    },
-                                    {
-                                        tag: regEx
-                                    }
-                                ]
-                        }
-                    },
-                    {
-                        $skip: (page - 1) * this.pageSize
-                    },
-                    {
-                        $limit: this.pageSize
+            const timestampSorting = MongoDBHandler.getTimestampSorting(timestampFilter);
+            const result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate([
+                {
+                    $match: {
+                        $or: [
+                            {
+                                name: regEx
+                            },
+                            {
+                                tag: regEx
+                            }
+                        ]
                     }
-                    ]
-            ).sort({timestamp: 1});
+                },
+                { $skip: (page - 1) * this.pageSize },
+                { $limit: this.pageSize },
+            ]).sort({timestamp: timestampSorting});
             return result.toArray();
         } catch (exception) {
             console.error(exception);
@@ -104,27 +93,29 @@ class MongoDBHandler {
         }
     }
 
-    public async retrieveAllReplays(dbName : string, collectionName :  string, page: number = 1) {
-        try {
-            const result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate([
-                { $match: {} },
-                { $skip: (page - 1) * this.pageSize },
-                { $limit: this.pageSize }
-            ]);
-            return result.toArray();
-        } catch (exception) {
-            console.error(exception);
-            return [];
+    private static getTimestampSorting(timestampFilter : string) : number {
+        let timestampSorting = 1;
+        if(timestampFilter !== undefined && timestampFilter.startsWith('Timestamp (ASC)')) {
+            timestampSorting = -1;
         }
+        return timestampSorting;
     }
 
-    public async getPageMax(dbName : string, collectionName : string) : Promise<number> {
+    public async getPageMax(dbName : string, collectionName : string, searchString : string) : Promise<number> {
         try {
-            const documentsCount = await this.mongoDBConnection.db(dbName).collection(collectionName).countDocuments();
+            const regEx = new RegExp('.*' + searchString + '.*');
+            const documentsCount = await this.mongoDBConnection.db(dbName).collection(collectionName).countDocuments({$or: [
+                    {
+                        name: regEx
+                    },
+                    {
+                        tag: regEx
+                    }
+                ]});
             return Math.floor(documentsCount / this.pageSize);
         } catch (exception) {
             console.error(exception);
-            return 0;
+            throw exception.message;
         }
     }
 

@@ -64,7 +64,7 @@ var MongoDBHandler = /** @class */ (function () {
                         return [3 /*break*/, 3];
                     case 2:
                         exception_1 = _b.sent();
-                        console.log(exception_1);
+                        console.error(exception_1);
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
@@ -129,19 +129,14 @@ var MongoDBHandler = /** @class */ (function () {
             });
         });
     };
-    /**
-     * @param dbName
-     * @param collectionName
-     * @param searchString
-     * @param page
-     */
-    MongoDBHandler.prototype.searchReplaysByNameOrToken = function (dbName, collectionName, searchString, page) {
+    MongoDBHandler.prototype.retrieveAllReplays = function (dbName, collectionName, page, searchString, timestampFilter) {
         if (page === void 0) { page = 1; }
         return __awaiter(this, void 0, void 0, function () {
-            var regEx, result;
+            var regEx, timestampSorting, result;
             return __generator(this, function (_a) {
                 try {
                     regEx = new RegExp('.*' + searchString + '.*');
+                    timestampSorting = MongoDBHandler.getTimestampSorting(timestampFilter);
                     result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate([
                         {
                             $match: {
@@ -155,13 +150,9 @@ var MongoDBHandler = /** @class */ (function () {
                                 ]
                             }
                         },
-                        {
-                            $skip: (page - 1) * this.pageSize
-                        },
-                        {
-                            $limit: this.pageSize
-                        }
-                    ]).sort({ timestamp: 1 });
+                        { $skip: (page - 1) * this.pageSize },
+                        { $limit: this.pageSize },
+                    ]).sort({ timestamp: timestampSorting });
                     return [2 /*return*/, result.toArray()];
                 }
                 catch (exception) {
@@ -172,42 +163,36 @@ var MongoDBHandler = /** @class */ (function () {
             });
         });
     };
-    MongoDBHandler.prototype.retrieveAllReplays = function (dbName, collectionName, page) {
-        if (page === void 0) { page = 1; }
-        return __awaiter(this, void 0, void 0, function () {
-            var result;
-            return __generator(this, function (_a) {
-                try {
-                    result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate([
-                        { $match: {} },
-                        { $skip: (page - 1) * this.pageSize },
-                        { $limit: this.pageSize }
-                    ]);
-                    return [2 /*return*/, result.toArray()];
-                }
-                catch (exception) {
-                    console.error(exception);
-                    return [2 /*return*/, []];
-                }
-                return [2 /*return*/];
-            });
-        });
+    MongoDBHandler.getTimestampSorting = function (timestampFilter) {
+        var timestampSorting = 1;
+        if (timestampFilter !== undefined && timestampFilter.startsWith('Timestamp (ASC)')) {
+            timestampSorting = -1;
+        }
+        return timestampSorting;
     };
-    MongoDBHandler.prototype.getPageMax = function (dbName, collectionName) {
+    MongoDBHandler.prototype.getPageMax = function (dbName, collectionName, searchString) {
         return __awaiter(this, void 0, void 0, function () {
-            var documentsCount, exception_2;
+            var regEx, documentsCount, exception_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.mongoDBConnection.db(dbName).collection(collectionName).countDocuments()];
+                        regEx = new RegExp('.*' + searchString + '.*');
+                        return [4 /*yield*/, this.mongoDBConnection.db(dbName).collection(collectionName).countDocuments({ $or: [
+                                    {
+                                        name: regEx
+                                    },
+                                    {
+                                        tag: regEx
+                                    }
+                                ] })];
                     case 1:
                         documentsCount = _a.sent();
                         return [2 /*return*/, Math.floor(documentsCount / this.pageSize)];
                     case 2:
                         exception_2 = _a.sent();
                         console.error(exception_2);
-                        return [2 /*return*/, 0];
+                        throw exception_2.message;
                     case 3: return [2 /*return*/];
                 }
             });

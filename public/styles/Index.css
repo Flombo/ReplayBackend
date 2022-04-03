@@ -157,14 +157,14 @@ html body .replayContainer .replay {
   color: #fff;
   font-size: 20px;
   transition-duration: 0.5s;
-  transition-property: background-color;
+  transition-property: background-color, border;
   transition-timing-function: ease-in-out;
 }
 html body .replayContainer .replay .replayHeader {
   display: flex;
   flex-direction: row;
   width: 100%;
-  justify-content: space-between;
+  justify-content: space-around;
   color: #252525;
   background-color: #fff;
   padding-bottom: 1%;
