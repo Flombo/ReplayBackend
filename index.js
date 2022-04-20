@@ -104,4 +104,4 @@ app.get('/filter', async(req, res) => {
    res.render('index.ejs');
 });
 
-server.listen(process.env.PORT, process.env.HOST);
+server.listen(3000, 'localhost');
