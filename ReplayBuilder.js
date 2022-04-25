@@ -7,8 +7,7 @@ var ReplayBuilder = /** @class */ (function () {
             replayHTML += "<div class=\"replay more\" title=\"" + replay._id + "\">"
                 + "<div class=\"replayHeader\">"
                 + ("<div>" + replay.name + "</div>")
-                + ("<div>" + replay.tag + "</div>")
-                + ("<div>" + replay.timestamp + "</div>")
+                + ("<div>" + replay.starttime + "</div>")
                 + "<button>\u2795</button>"
                 + "</div>"
                 + "</div>";
@@ -17,19 +16,19 @@ var ReplayBuilder = /** @class */ (function () {
         return replayHTML;
     };
     ReplayBuilder.buildReplayDetails = function (replay) {
-        var detailContainers = this.buildRotationContainer(replay.rotation)
-            + this.buildPositionContainer(replay.position)
-            + this.buildIsActiveContainer(replay.isActive);
+        var detailContainers = this.buildReplayRecordContainer(replay.replayRecords)
+            + this.buildTimeContainer(replay)
+            + this.buildUserNameContainer(replay.username);
         return "<div class=\"replayDetails\">" + detailContainers + "</div>";
     };
-    ReplayBuilder.buildPositionContainer = function (position) {
-        return "<div><p>x: " + position.x + "</p><p>y: " + position.y + "</p><p>z: " + position.z + "</p></div>";
+    ReplayBuilder.buildTimeContainer = function (replay) {
+        return "<div><p>starttime: " + replay.starttime + "</p><p>endtime: " + replay.endtime + "</p><p>duration: " + replay.duration + "</p></div>";
     };
-    ReplayBuilder.buildRotationContainer = function (rotation) {
-        return "<div><p>x: " + rotation.x + "</p><p>y: " + rotation.y + "</p><p>z: " + rotation.z + "</p><p>w: " + rotation.w + "</p></div>";
+    ReplayBuilder.buildReplayRecordContainer = function (replayRecords) {
+        return "<div><p>ReplayRecord-count: " + replayRecords.length + "</p></div>";
     };
-    ReplayBuilder.buildIsActiveContainer = function (isActive) {
-        return "<div>isActive: " + isActive + "</div>";
+    ReplayBuilder.buildUserNameContainer = function (userName) {
+        return "<div><p>userName: " + userName + "</p></div>";
     };
     return ReplayBuilder;
 }());

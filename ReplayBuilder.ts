@@ -7,8 +7,7 @@ class ReplayBuilder {
             replayHTML += `<div class="replay more" title="${replay._id}">`
                             + `<div class="replayHeader">`
                                 + `<div>${replay.name}</div>`
-                                + `<div>${replay.tag}</div>`
-                                + `<div>${replay.timestamp}</div>`
+                                + `<div>${replay.starttime}</div>`
                                 + `<button>➕</button>`
                             + `</div>`
                            + `</div>`
@@ -20,23 +19,23 @@ class ReplayBuilder {
     }
 
     public static buildReplayDetails(replay) : string {
-        const detailContainers = this.buildRotationContainer(replay.rotation)
-            + this.buildPositionContainer(replay.position)
-            + this.buildIsActiveContainer(replay.isActive);
+        const detailContainers = this.buildReplayRecordContainer(replay.replayRecords)
+            + this.buildTimeContainer(replay)
+            + this.buildUserNameContainer(replay.username);
 
         return `<div class="replayDetails">${detailContainers}</div>`;
     }
 
-    private static buildPositionContainer(position) : string {
-        return `<div><p>x: ${position.x}</p><p>y: ${position.y}</p><p>z: ${position.z}</p></div>`;
+    private static buildTimeContainer(replay) : string {
+        return `<div><p>starttime: ${replay.starttime}</p><p>endtime: ${replay.endtime}</p><p>duration: ${replay.duration}</p></div>`;
     }
 
-    private static buildRotationContainer(rotation) : string {
-        return `<div><p>x: ${rotation.x}</p><p>y: ${rotation.y}</p><p>z: ${rotation.z}</p><p>w: ${rotation.w}</p></div>`
+    private static buildReplayRecordContainer(replayRecords) : string {
+        return `<div><p>ReplayRecord-count: ${replayRecords.length}</p></div>`
     }
 
-    private static buildIsActiveContainer(isActive) : string {
-        return `<div>isActive: ${isActive}</div>`;
+    private static buildUserNameContainer(userName) : string {
+        return `<div><p>userName: ${userName}</p></div>`;
     }
 
 }

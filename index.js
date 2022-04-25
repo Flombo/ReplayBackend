@@ -9,11 +9,10 @@ const ReplayBuilder = require("./ReplayBuilder.js");
 const server = http.createServer(app);
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname));
-const databaseName = process.env.MONGODBDATABASE;
 
 app.get('/', async(req, res) => {
     try {
-        const replays = await MongoDBHandler.retrieveAllReplays(databaseName, databaseName);
+        const replays = await MongoDBHandler.retrieveAllReplays();
         const replayHTML = ReplayBuilder.buildReplays(replays);
         res.render('index.ejs', {replayHTML: replayHTML, page: 1, pageMax: 6, error: null});
     } catch (exception) {
@@ -22,10 +21,20 @@ app.get('/', async(req, res) => {
     }
 })
 
+app.post('/setreplayheader', async(req, res) => {
+    try {
+        const result = await MongoDBHandler.addReplayHeader(req.body);
+        res.status(200).json({result: result});
+    } catch (exception) {
+        console.error(exception);
+        res.status(500).json({error: exception.message});
+    }
+});
+
 app.post('/setreplays', async(req, res) => {
     try {
-        const result = await MongoDBHandler.addReplay(databaseName, databaseName, req.body);
-        res.send(result);
+        const result = await MongoDBHandler.addReplayRecords(req.body);
+        res.status(200).json({result: result});
     } catch (exception) {
         console.error(exception)
         res.status(500).json({error: exception.message});
@@ -34,7 +43,7 @@ app.post('/setreplays', async(req, res) => {
 
 app.get('/replays', async(req, res) => {
     const name = req.query.name;
-    const result = await MongoDBHandler.retrieveReplays(databaseName, databaseName, name);
+    const result = await MongoDBHandler.retrieveReplays(name);
     res.json(result);
 });
 
@@ -45,9 +54,9 @@ app.post('/pagination', async(req, res) => {
         const searchString = req.body.searchString;
         const timestampFilter = req.body.timestampFilter;
         const nextPage = await calculateNextPage(pageInfo, currentPage, searchString);
-        const replays = await MongoDBHandler.retrieveAllReplays(databaseName, databaseName, nextPage, searchString, timestampFilter);
+        const replays = await MongoDBHandler.retrieveAllReplays(nextPage, searchString, timestampFilter);
         const replayHTML = ReplayBuilder.buildReplays(replays);
-        const pageMax = await MongoDBHandler.getPageMax(databaseName, databaseName, searchString);
+        const pageMax = await MongoDBHandler.getPageMax(searchString);
         let paginationEnd = nextPage + 6 >= pageMax ? pageMax : nextPage + 6;
 
         res.status(200).json({replayHTML: replayHTML, page: nextPage, paginationEnd: paginationEnd});
@@ -58,7 +67,7 @@ app.post('/pagination', async(req, res) => {
 });
 
 async function calculateNextPage(pageInfo, currentPage, searchString) {
-    const pageMax = await MongoDBHandler.getPageMax(databaseName, databaseName, searchString);
+    const pageMax = await MongoDBHandler.getPageMax(searchString);
 
     if(pageInfo === undefined) {
         throw 'pageInfo undefined';
@@ -90,7 +99,7 @@ async function calculateNextPage(pageInfo, currentPage, searchString) {
 app.post('/getreplaydetails', async(req, res) => {
     try {
         const replayID = req.body.replayID;
-        const replay = await MongoDBHandler.retrieveReplayDetails(databaseName, databaseName, replayID);
+        const replay = await MongoDBHandler.retrieveReplayDetails(replayID);
         const replayDetails = ReplayBuilder.buildReplayDetails(replay);
         res.status(200).json({replayDetails: replayDetails});
 

@@ -41,6 +41,8 @@ var _a = require('mongodb'), MongoClient = _a.MongoClient, ServerApiVersion = _a
 require('dotenv').config();
 var uri = process.env.MONGODB;
 var client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+var databaseName = process.env.MONGODBDATABASE;
+var collectionName = process.env.MONGODBDATABASE;
 // const { DateTime } = require("luxon");
 var MongoDBHandler = /** @class */ (function () {
     function MongoDBHandler() {
@@ -71,17 +73,34 @@ var MongoDBHandler = /** @class */ (function () {
             });
         });
     };
-    /**
-     * @param dbName
-     * @param collectionName
-     * @param replay
-     */
-    MongoDBHandler.prototype.addReplay = function (dbName, collectionName, replay) {
+    MongoDBHandler.prototype.addReplayHeader = function (replayHeader) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 try {
-                    // replay.timestamp = new DateTime(replay.timestamp);
-                    return [2 /*return*/, this.mongoDBConnection.db(dbName).collection(collectionName).insertMany(replay)];
+                    return [2 /*return*/, this.mongoDBConnection.db(databaseName).collection(collectionName).insert(replayHeader)];
+                }
+                catch (exception) {
+                    throw exception;
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    /**
+     * @param replayRecords
+     */
+    MongoDBHandler.prototype.addReplayRecords = function (replayRecords) {
+        return __awaiter(this, void 0, void 0, function () {
+            var filter, update;
+            return __generator(this, function (_a) {
+                try {
+                    filter = { replayName: replayRecords.replayName };
+                    update = {
+                        $set: {
+                            replayRecords: replayRecords
+                        }
+                    };
+                    return [2 /*return*/, this.mongoDBConnection.db(databaseName).collection(collectionName).update(filter, update)];
                 }
                 catch (exception) {
                     console.error(exception);
@@ -93,16 +112,14 @@ var MongoDBHandler = /** @class */ (function () {
     };
     /**
      * Returns an array of replays for the given replay-name.
-     * @param dbName
-     * @param collectionName
      * @param name
      */
-    MongoDBHandler.prototype.retrieveReplays = function (dbName, collectionName, name) {
+    MongoDBHandler.prototype.retrieveReplays = function (name) {
         return __awaiter(this, void 0, void 0, function () {
             var result;
             return __generator(this, function (_a) {
                 try {
-                    result = this.mongoDBConnection.db(dbName).collection(collectionName).find({ name: { $eq: name } }).sort({ timestamp: 1 });
+                    result = this.mongoDBConnection.db(databaseName).collection(collectionName).find({ name: { $eq: name } }).sort({ starttime: 1 });
                     return [2 /*return*/, result.toArray()];
                 }
                 catch (exception) {
@@ -113,12 +130,12 @@ var MongoDBHandler = /** @class */ (function () {
             });
         });
     };
-    MongoDBHandler.prototype.retrieveReplayDetails = function (dbName, collectionName, replayID) {
+    MongoDBHandler.prototype.retrieveReplayDetails = function (replayID) {
         return __awaiter(this, void 0, void 0, function () {
             var findCursor;
             return __generator(this, function (_a) {
                 try {
-                    findCursor = this.mongoDBConnection.db(dbName).collection(collectionName).find({ _id: new mongodb_1.ObjectId(replayID) });
+                    findCursor = this.mongoDBConnection.db(databaseName).collection(collectionName).find({ _id: new mongodb_1.ObjectId(replayID) });
                     return [2 /*return*/, findCursor.next()];
                 }
                 catch (exception) {
@@ -129,7 +146,7 @@ var MongoDBHandler = /** @class */ (function () {
             });
         });
     };
-    MongoDBHandler.prototype.retrieveAllReplays = function (dbName, collectionName, page, searchString, timestampFilter) {
+    MongoDBHandler.prototype.retrieveAllReplays = function (page, searchString, timestampFilter) {
         if (page === void 0) { page = 1; }
         return __awaiter(this, void 0, void 0, function () {
             var regEx, timestampSorting, result;
@@ -137,7 +154,7 @@ var MongoDBHandler = /** @class */ (function () {
                 try {
                     regEx = new RegExp('.*' + searchString + '.*');
                     timestampSorting = MongoDBHandler.getTimestampSorting(timestampFilter);
-                    result = this.mongoDBConnection.db(dbName).collection(collectionName).aggregate([
+                    result = this.mongoDBConnection.db(databaseName).collection(collectionName).aggregate([
                         {
                             $match: {
                                 $or: [
@@ -152,7 +169,7 @@ var MongoDBHandler = /** @class */ (function () {
                         },
                         { $skip: (page - 1) * this.pageSize },
                         { $limit: this.pageSize },
-                    ]).sort({ timestamp: timestampSorting });
+                    ]).sort({ starttime: timestampSorting });
                     return [2 /*return*/, result.toArray()];
                 }
                 catch (exception) {
@@ -170,7 +187,7 @@ var MongoDBHandler = /** @class */ (function () {
         }
         return timestampSorting;
     };
-    MongoDBHandler.prototype.getPageMax = function (dbName, collectionName, searchString) {
+    MongoDBHandler.prototype.getPageMax = function (searchString) {
         return __awaiter(this, void 0, void 0, function () {
             var regEx, documentsCount, exception_2;
             return __generator(this, function (_a) {
@@ -178,7 +195,7 @@ var MongoDBHandler = /** @class */ (function () {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
                         regEx = new RegExp('.*' + searchString + '.*');
-                        return [4 /*yield*/, this.mongoDBConnection.db(dbName).collection(collectionName).countDocuments({ $or: [
+                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(collectionName).countDocuments({ $or: [
                                     {
                                         name: regEx
                                     },

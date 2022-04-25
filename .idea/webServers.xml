@@ -3,7 +3,7 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="e2ae66a8-4664-4766-904a-89158d444525" name="ReplayVM">
-        <fileTransfer rootFolder="/home/debian" accessType="SFTP" host="192.52.44.78" port="22" sshConfigId="ab32c72c-a482-45e1-b03a-0ddeb32fa845" sshConfig="debian@192.52.44.78:22 key" keyPair="true">
+        <fileTransfer rootFolder="/home/debian" accessType="SFTP" host="192.52.43.42" port="22" sshConfigId="ab32c72c-a482-45e1-b03a-0ddeb32fa845" sshConfig="debian@192.52.43.42:22 key" keyPair="true">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
