@@ -1,11 +1,10 @@
 import {ObjectId} from "mongodb";
-
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 const uri = process.env.MONGODB;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const databaseName = process.env.MONGODBDATABASE
-const collectionName = process.env.MONGODBDATABASE
+const collectionName = process.env.MONGODBCOLLECTION
 // const { DateTime } = require("luxon");
 
 class MongoDBHandler {
@@ -24,14 +23,6 @@ class MongoDBHandler {
             this.mongoDBConnection = await client.connect();
         } catch (exception) {
             console.error(exception);
-        }
-    }
-
-    public async addReplayHeader(replayHeader) {
-        try {
-            return this.mongoDBConnection.db(databaseName).collection(collectionName).insert(replayHeader);
-        } catch (exception) {
-            throw exception;
         }
     }
 

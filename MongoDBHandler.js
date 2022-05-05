@@ -42,7 +42,7 @@ require('dotenv').config();
 var uri = process.env.MONGODB;
 var client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 var databaseName = process.env.MONGODBDATABASE;
-var collectionName = process.env.MONGODBDATABASE;
+var collectionName = process.env.MONGODBCOLLECTION;
 // const { DateTime } = require("luxon");
 var MongoDBHandler = /** @class */ (function () {
     function MongoDBHandler() {
@@ -70,19 +70,6 @@ var MongoDBHandler = /** @class */ (function () {
                         return [3 /*break*/, 3];
                     case 3: return [2 /*return*/];
                 }
-            });
-        });
-    };
-    MongoDBHandler.prototype.addReplayHeader = function (replayHeader) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                try {
-                    return [2 /*return*/, this.mongoDBConnection.db(databaseName).collection(collectionName).insert(replayHeader)];
-                }
-                catch (exception) {
-                    throw exception;
-                }
-                return [2 /*return*/];
             });
         });
     };

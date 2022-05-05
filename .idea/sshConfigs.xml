@@ -2,7 +2,7 @@
 <project version="4">
   <component name="SshConfigs">
     <configs>
-      <sshConfig host="192.52.43.42" id="ab32c72c-a482-45e1-b03a-0ddeb32fa845" keyPath="C:\Users\flori\WebstormProjects\ReplaySystemBackend\replayVM.pem" port="22" nameFormat="DESCRIPTIVE" username="debian" />
+      <sshConfig authType="PASSWORD" host="172.17.216.17" id="ab32c72c-a482-45e1-b03a-0ddeb32fa845" port="22" nameFormat="DESCRIPTIVE" username="pi" />
     </configs>
   </component>
 </project>
