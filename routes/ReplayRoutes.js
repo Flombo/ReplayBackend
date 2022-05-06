@@ -5,7 +5,8 @@ const router = express.Router();
 
 router.get('/', async(req, res) => {
     try {
-        const replays = await MongoDBHandler.retrieveAllReplays();
+        console.log(__dirname + '/public');
+        const replays = await MongoDBHandler.retrieveAllReplays(1, '', '');
         const replayHTML = ReplayBuilder.buildReplays(replays);
         res.render('index.ejs', {replayHTML: replayHTML, page: 1, pageMax: 6, error: null});
     } catch (exception) {

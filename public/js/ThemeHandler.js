@@ -30,11 +30,11 @@ class ThemeHandler {
 
         if(htmlTag.className === 'lightmode') {
             htmlTag.className = '';
-            iconPath = '../../public/icons/DarkModeIcon.svg';
+            iconPath = '/icons/DarkModeIcon.svg';
             modeValue = 'dark';
         } else {
             htmlTag.className = 'lightmode';
-            iconPath = '../../public/icons/LightModeIcon.svg';
+            iconPath = '/icons/LightModeIcon.svg';
             modeValue = 'light';
         }
 

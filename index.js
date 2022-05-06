@@ -6,7 +6,7 @@ const http = require('http');
 require('dotenv').config();
 const server = http.createServer(app);
 app.set('view engine', 'ejs');
-app.use(express.static(__dirname));
+app.use(express.static(__dirname + '/public'));
 const replayRoutes = require('./routes/ReplayRoutes.js');
 
 app.use('/', replayRoutes);
