@@ -31,16 +31,10 @@ class MongoDBHandler {
      */
     public async addReplayRecords(replayRecords) {
         try {
-            const filter = {replayName: replayRecords.replayName};
-            const update = {
-                $set: {
-                    replayRecords: replayRecords
-                }
-            };
-            return this.mongoDBConnection.db(databaseName).collection(collectionName).update(filter, update);
+            return this.mongoDBConnection.db(databaseName).collection(collectionName).insertMany(replayRecords);
         } catch (exception) {
             console.error(exception);
-            return {};
+            throw exception;
         }
     }
 
@@ -54,7 +48,7 @@ class MongoDBHandler {
             return result.toArray();
         } catch (exception) {
             console.error(exception);
-            return [];
+            throw exception;
         }
     }
 
