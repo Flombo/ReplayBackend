@@ -1,11 +1,13 @@
 import {ObjectId} from "mongodb";
+
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 const uri = process.env.MONGODB;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const databaseName = process.env.MONGODBDATABASE
-const collectionName = process.env.MONGODBCOLLECTION
-// const { DateTime } = require("luxon");
+const replayRecordsCollectionName = process.env.REPLAYCOLLECTIONNAME
+const timelineEventsCollectionName = process.env.TIMELINEEVENTSCOLLECTIONNAME
+const { DateTime } = require("luxon");
 
 class MongoDBHandler {
 
@@ -26,38 +28,113 @@ class MongoDBHandler {
         }
     }
 
-    /**
-     * @param replayRecords
-     */
-    public async addReplayRecords(replayRecords) {
+    public async createTimeLineEvent(timelineEvent) {
         try {
-            return this.mongoDBConnection.db(databaseName).collection(collectionName).insertMany(replayRecords);
+            return this.mongoDBConnection.db(databaseName).collection(timelineEvent.replayName + timelineEventsCollectionName).insertOne(timelineEvent);
         } catch (exception) {
-            console.error(exception);
             throw exception;
         }
     }
 
     /**
-     * Returns an array of replays for the given replay-name.
-     * @param name
+     * @param replayRecords
      */
-    public async retrieveReplays(name : string) {
+    public async addReplayRecords(replayRecords) {
         try {
-            const result = this.mongoDBConnection.db(databaseName).collection(collectionName).find({name: {$eq: name}}).sort({starttime: 1});
+            return this.mongoDBConnection.db(databaseName).collection(replayRecords[0].replayName + replayRecordsCollectionName).insertMany(replayRecords);
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async getReplayRecordsAmount(replayName : string) {
+        try {
+            return this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).countDocuments();
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async getReplayRecordBatch(replayName : string, batchSize : number, currentTimelineKnobPosition : number) {
+        try {
+            const start: number = Math.abs(Math.round(currentTimelineKnobPosition - batchSize / 2));
+
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find().skip(start).limit(Number.parseInt(String(batchSize))).sort({starttime: 1}).toArray();
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async getTimelineEvents(replayName : string) {
+        try {
+            return this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).find().sort({starttime: 1});
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async getReplayCollectionObjects(userName : string) {
+        try {
+            const regEx = new RegExp('.*' + userName + '_records.*');
+            const collectionNames = await this.mongoDBConnection.db(databaseName).listCollections({name: {$regex: regEx}}, { nameOnly: true }).toArray();
+
+            const replayCollectionsWithDuration = [];
+
+            for(let i : number = 0; i < collectionNames.length; i++) {
+                const collectionName = collectionNames[i];
+                const startTime = collectionName.name.split('_')[0].replace('_', '');
+                const duration = await this.getDuration(collectionName.name, startTime);
+                const replayCollectionObject = {
+                    name: collectionName.name,
+                    duration: duration.milliseconds
+                }
+                replayCollectionsWithDuration.push(replayCollectionObject);
+            }
+
+            return replayCollectionsWithDuration;
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    private async getDuration(replayCollectionName : string, startTime : string) {
+        try {
+            const lastReplayRecordCursor = await this.mongoDBConnection.db(databaseName).collection(replayCollectionName).find({}, {
+                projection: {
+                    _id: false,
+                    timestamp: true
+                }
+            }).limit(1);
+            const lastReplayRecord = await lastReplayRecordCursor.next();
+
+            if(lastReplayRecord === null) throw 'collection contains no record';
+            const startTimeDateTime = DateTime.fromISO(startTime);
+            const endTimeDateTime = DateTime.fromISO(lastReplayRecord.timestamp);
+            return endTimeDateTime.diff(startTimeDateTime).toObject();
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    /**
+     * Returns an array of replays for the given replay-name and gameObjectName.
+     * @param gameObjectName
+     * @param replayName
+     */
+    public async retrieveReplays(gameObjectName : string, replayName : string) {
+        try {
+            const result = this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({name: {$eq: gameObjectName}}).sort({starttime: 1});
             return result.toArray();
         } catch (exception) {
-            console.error(exception);
             throw exception;
         }
     }
 
     public async retrieveReplayDetails(replayID : string) {
         try {
-            const findCursor = this.mongoDBConnection.db(databaseName).collection(collectionName).find({_id: new ObjectId(replayID)});
+            const findCursor = this.mongoDBConnection.db(databaseName).collection(replayRecordsCollectionName).find({_id: new ObjectId(replayID)});
             return findCursor.next();
         } catch (exception) {
-            console.error(exception);
             throw exception;
         }
     }
@@ -66,7 +143,7 @@ class MongoDBHandler {
         try {
             const regEx = new RegExp('.*' + searchString + '.*');
             const timestampSorting = MongoDBHandler.getTimestampSorting(timestampFilter);
-            const result = this.mongoDBConnection.db(databaseName).collection(collectionName).aggregate([
+            const result = this.mongoDBConnection.db(databaseName).collection(replayRecordsCollectionName).aggregate([
                 {
                     $match: {
                         $or: [
@@ -84,7 +161,6 @@ class MongoDBHandler {
             ]).sort({starttime: timestampSorting});
             return result.toArray();
         } catch (exception) {
-            console.error(exception);
             throw exception;
         }
     }
@@ -100,7 +176,7 @@ class MongoDBHandler {
     public async getPageMax(searchString : string) : Promise<number> {
         try {
             const regEx = new RegExp('.*' + searchString + '.*');
-            const documentsCount = await this.mongoDBConnection.db(databaseName).collection(collectionName).countDocuments({$or: [
+            const documentsCount = await this.mongoDBConnection.db(databaseName).collection(replayRecordsCollectionName).countDocuments({$or: [
                     {
                         name: regEx
                     },
@@ -110,8 +186,7 @@ class MongoDBHandler {
                 ]});
             return Math.floor(documentsCount / this.pageSize);
         } catch (exception) {
-            console.error(exception);
-            throw exception.message;
+            throw exception;
         }
     }
 

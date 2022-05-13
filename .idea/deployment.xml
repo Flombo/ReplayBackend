@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="ReplayVM" exclude=".svn;.cvs;.idea;.DS_Store;.git;.hg;*.hprof;*.pyc;.scss;.css.map;.ts" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="ReplayVM" exclude=".svn;.cvs;.idea;.DS_Store;.git;.hg;*.hprof;*.pyc;.scss;.css.map;.ts" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+    <option name="confirmBeforeUploading" value="false" />
     <serverData>
       <paths name="ReplayVM">
         <serverdata>
           <mappings>
-            <mapping deploy="/replaybackend" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/Projekt" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

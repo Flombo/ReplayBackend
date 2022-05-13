@@ -6,6 +6,8 @@ sudo docker run --restart=always --name influxdb -d \
   -p 8086:8086 \
   --volume `pwd`/influxdb2:/var/lib/influxdb2 \
   --volume `pwd`/config.yml:/etc/influxdb2/config.yml \
+  --volume /etc/timezone:/etc/timezone:ro \
+  --volume /etc/localtime:/etc/localtime:ro \
   influxdb:2.0.7
 # wait until the database server is ready
 until sudo docker exec influxdb influx ping
