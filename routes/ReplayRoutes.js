@@ -25,26 +25,29 @@ router.post('/createtimelineevent', async(req, res) => {
 
 router.post('/setreplays', async(req, res) => {
     try {
-        await MongoDBHandler.addReplayRecords(req.body);
+        const replayName = req.body.replayName;
+        const replayRecords = req.body.replayRecords;
+        await MongoDBHandler.addReplayRecords(replayName, replayRecords);
         res.status(200);
     } catch (exception) {
+        console.log(exception.message)
         handleException(res, exception);
     }
 });
 
-router.get('/getreplaycollectionobjects', async(req, res) => {
+router.post('/getreplaycollectionobjects', async(req, res) => {
    try {
-       const userName = req.query.username;
+       const userName = req.body.username;
        const replayCollectionObjects = await MongoDBHandler.getReplayCollectionObjects(userName);
-       res.status(200).json({replayCollectionObjects : replayCollectionObjects});
+       res.status(200).json(replayCollectionObjects);
    } catch (exception) {
        handleException(res, exception);
    }
 });
 
-router.get('/getreplayrecordsamount', async(req, res) => {
+router.post('/getreplayrecordsamount', async(req, res) => {
     try {
-        const replayName = req.query.replayName;
+        const replayName = req.body.replayName;
         const result = await MongoDBHandler.getReplayRecordsAmount(replayName);
         res.status(200).json(result);
     } catch (exception) {
@@ -52,17 +55,42 @@ router.get('/getreplayrecordsamount', async(req, res) => {
     }
 });
 
-router.get('/getreplayrecordbatch', async(req, res) => {
+router.post('/getreplayrecordbatch', async(req, res) => {
    try {
-        const replayName = req.query.replayName;
-        const batchSize = req.query.batchSize;
-        const currentTimelineKnobPosition = req.query.currentTimelineKnobPosition;
-
-        const result = await MongoDBHandler.getReplayRecordBatch(replayName, batchSize, currentTimelineKnobPosition);
-        res.status(200).json({replayRecords: result});
+        const replayName = req.body.replayName;
+        const batchSize = req.body.batchSize;
+        const currentTimelineKnobPosition = req.body.currentTimelineKnobPosition;
+        const name = req.body.name;
+        const result = await MongoDBHandler.getReplayRecordBatch(replayName, batchSize, currentTimelineKnobPosition, name);
+        res.status(200).json(result);
    } catch (exception) {
+       console.log(exception)
        handleException(res, exception);
    }
+});
+
+router.post('/getreplayrecordsforcertaingameobject', async(req, res) => {
+   try {
+       const replayName = req.body.replayName;
+       const name = req.body.name;
+       const result = await MongoDBHandler.getReplayRecordsForCertainGameObject(replayName, name);
+       res.status(200).json(result);
+   } catch (exception) {
+       console.log(exception);
+       handleException(res, exception);
+   }
+});
+
+router.post('/getreplayrecords', async(req, res) => {
+    try {
+        const replayName = req.body.replayName;
+
+        const result = await MongoDBHandler.getReplayRecords(replayName);
+        res.status(200).json(result);
+    } catch (exception) {
+        console.log(exception)
+        handleException(res, exception);
+    }
 });
 
 router.get('/gettimelineevents', async(req, res) => {

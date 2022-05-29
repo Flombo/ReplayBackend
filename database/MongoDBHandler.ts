@@ -37,11 +37,12 @@ class MongoDBHandler {
     }
 
     /**
+     * @param replayName
      * @param replayRecords
      */
-    public async addReplayRecords(replayRecords) {
+    public async addReplayRecords(replayName : string, replayRecords) {
         try {
-            return this.mongoDBConnection.db(databaseName).collection(replayRecords[0].replayName + replayRecordsCollectionName).insertMany(replayRecords);
+            return this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).insertMany(replayRecords);
         } catch (exception) {
             throw exception;
         }
@@ -55,11 +56,34 @@ class MongoDBHandler {
         }
     }
 
-    public async getReplayRecordBatch(replayName : string, batchSize : number, currentTimelineKnobPosition : number) {
+    public async getReplayRecords(replayName : string) {
+        try {
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find().sort({timestamp: 1}).toArray();
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async getReplayRecordBatch(replayName : string, batchSize : number, currentTimelineKnobPosition : number, name : string) {
         try {
             const start: number = Math.abs(Math.round(currentTimelineKnobPosition - batchSize / 2));
+            const starttime = replayName.split('_')[0].replace('_', '');
+            const currentStart = DateTime.fromISO(starttime).plus(start);
+            const currentEnd = DateTime.fromISO(starttime).plus(batchSize);
 
-            return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find().skip(start).limit(Number.parseInt(String(batchSize))).sort({starttime: 1}).toArray();
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find(
+                {
+                    name: name
+                }
+                ).sort({timestamp: 1}).toArray();
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async getReplayRecordsForCertainGameObject(replayName : string, name : string) {
+        try {
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({name : name}).sort({timestamp: 1}).toArray();
         } catch (exception) {
             throw exception;
         }
@@ -83,10 +107,12 @@ class MongoDBHandler {
             for(let i : number = 0; i < collectionNames.length; i++) {
                 const collectionName = collectionNames[i];
                 const startTime = collectionName.name.split('_')[0].replace('_', '');
-                const duration = await this.getDuration(collectionName.name, startTime);
+                const durationAndEndtime = await this.getDurationAndEndtime(collectionName.name, startTime);
                 const replayCollectionObject = {
-                    name: collectionName.name,
-                    duration: duration.milliseconds
+                    name: collectionName.name.replace(replayRecordsCollectionName, ''),
+                    startTime,
+                    endTime: durationAndEndtime.endtime,
+                    duration: durationAndEndtime.duration.milliseconds
                 }
                 replayCollectionsWithDuration.push(replayCollectionObject);
             }
@@ -97,7 +123,7 @@ class MongoDBHandler {
         }
     }
 
-    private async getDuration(replayCollectionName : string, startTime : string) {
+    private async getDurationAndEndtime(replayCollectionName : string, startTime : string) {
         try {
             const lastReplayRecordCursor = await this.mongoDBConnection.db(databaseName).collection(replayCollectionName).find({}, {
                 projection: {
@@ -110,7 +136,7 @@ class MongoDBHandler {
             if(lastReplayRecord === null) throw 'collection contains no record';
             const startTimeDateTime = DateTime.fromISO(startTime);
             const endTimeDateTime = DateTime.fromISO(lastReplayRecord.timestamp);
-            return endTimeDateTime.diff(startTimeDateTime).toObject();
+            return {duration: endTimeDateTime.diff(startTimeDateTime).toObject(), endtime: lastReplayRecord.timestamp};
         } catch (exception) {
             throw exception;
         }
