@@ -4,15 +4,19 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 const uri = process.env.MONGODB;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-const databaseName = process.env.MONGODBDATABASE
-const replayRecordsCollectionName = process.env.REPLAYCOLLECTIONNAME
-const timelineEventsCollectionName = process.env.TIMELINEEVENTSCOLLECTIONNAME
+const databaseName = process.env.MONGODBDATABASE;
+const replayRecordsCollectionName = process.env.REPLAYCOLLECTIONNAME;
+const audioRecordsCollectionName = process.env.AUDIOCOLLECTIONNAME;
+const animationRecordsCollectionName = process.env.ANIMATIONCOLLECTIONNAME;
+const timelineEventsCollectionName = process.env.TIMELINEEVENTSCOLLECTIONNAME;
 const { DateTime } = require("luxon");
 
 class MongoDBHandler {
 
     private mongoDBConnection = null;
     private pageSize : number = 20;
+    private setIndices : boolean = false;
+    private setTimelineIndices : boolean = false;
 
     constructor() {
         if(this.mongoDBConnection === null || this.mongoDBConnection === undefined) {
@@ -28,9 +32,53 @@ class MongoDBHandler {
         }
     }
 
+    private async createIndices(replayName : string) {
+        try {
+            if(this.setIndices) return;
+
+            this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).createIndex({
+                Timestamp: 1,
+                Name: 1
+            });
+
+            this.mongoDBConnection.db(databaseName).collection(replayName + audioRecordsCollectionName).createIndex({
+                Timestamp: 1,
+                GameObjectName: 1
+            });
+
+            this.mongoDBConnection.db(databaseName).collection(replayName + animationRecordsCollectionName).createIndex({
+                Timestamp: 1,
+                GameObjectName: 1
+            });
+
+            this.setIndices = true;
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    private async createTimelineEventIndizes(replayName : string) {
+        try {
+            if(this.setTimelineIndices) return;
+            this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).createIndex({
+                Starttime: 1
+            });
+            this.setTimelineIndices = true;
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
     public async createTimeLineEvent(timelineEvent) {
         try {
-            return this.mongoDBConnection.db(databaseName).collection(timelineEvent.replayName + timelineEventsCollectionName).insertOne(timelineEvent);
+            const replayName = timelineEvent.ReplayName;
+            if(this.setTimelineIndices) {
+                this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).dropIndexes(
+                    this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).getIndexes()
+                );
+                this.setIndices = false;
+            }
+            return this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).insertOne(timelineEvent);
         } catch (exception) {
             throw exception;
         }
@@ -40,9 +88,41 @@ class MongoDBHandler {
      * @param replayName
      * @param replayRecords
      */
-    public async addReplayRecords(replayName : string, replayRecords) {
+    public async addReplayRecords(replayName : string, replayRecords: []) {
         try {
+            if(this.setIndices) {
+                this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).getIndexes());
+                this.setIndices = false;
+            }
             return this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).insertMany(replayRecords);
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    /**
+     * @param ReplayName
+     * @param AudioRecords
+     */
+    public async addAudioRecords(ReplayName: any, AudioRecords: []) {
+        try {
+            if(this.setIndices) {
+                this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).getIndexes());
+                this.setIndices = false;
+            }
+            return this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).insertMany(AudioRecords);
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async addAnimationRecords(ReplayName: any, AnimationRecords: any[]) {
+        try {
+            if(this.setIndices) {
+                this.mongoDBConnection.db(databaseName).collection(ReplayName + animationRecordsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(ReplayName + animationRecordsCollectionName).getIndexes());
+                this.setIndices = false;
+            }
+            return this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).insertMany(AnimationRecords);
         } catch (exception) {
             throw exception;
         }
@@ -58,7 +138,25 @@ class MongoDBHandler {
 
     public async getReplayRecords(replayName : string) {
         try {
-            return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find().sort({timestamp: 1}).toArray();
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find().sort({Timestamp: 1}).toArray();
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async getAudioRecords(replayName : string, gameObjectName : string) {
+        try {
+            await this.createIndices(replayName);
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + audioRecordsCollectionName).find({GameObjectName : gameObjectName}).sort({Timestamp: 1}).toArray();
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async getAnimationRecords(replayName: any, gameObjectName: any) {
+        try {
+            await this.createIndices(replayName);
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + animationRecordsCollectionName).find({GameObjectName : gameObjectName}).sort({Timestamp: 1}).toArray();
         } catch (exception) {
             throw exception;
         }
@@ -69,13 +167,18 @@ class MongoDBHandler {
             const start: number = Math.abs(Math.round(currentTimelineKnobPosition - batchSize / 2));
             const starttime = replayName.split('_')[0].replace('_', '');
             const currentStart = DateTime.fromISO(starttime).plus(start);
-            const currentEnd = DateTime.fromISO(starttime).plus(batchSize);
+            const currentEnd = currentStart.plus(batchSize);
+            await this.createIndices(replayName);
 
             return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find(
                 {
-                    name: name
+                    Name: name,
+                    Timestamp: {
+                        $gte: currentStart.toUTC().toString(),
+                        $lte: currentEnd.toUTC().toString()
+                    }
                 }
-                ).sort({timestamp: 1}).toArray();
+                ).sort({Timestamp: 1}).toArray();
         } catch (exception) {
             throw exception;
         }
@@ -83,7 +186,8 @@ class MongoDBHandler {
 
     public async getReplayRecordsForCertainGameObject(replayName : string, name : string) {
         try {
-            return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({name : name}).sort({timestamp: 1}).toArray();
+            await this.createIndices(replayName);
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({Name : name}).sort({Timestamp: 1}).toArray();
         } catch (exception) {
             throw exception;
         }
@@ -91,7 +195,16 @@ class MongoDBHandler {
 
     public async getTimelineEvents(replayName : string) {
         try {
-            return this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).find().sort({starttime: 1});
+            await this.createTimelineEventIndizes(replayName);
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).find().sort({Starttime: 1}).toArray();
+        } catch (exception) {
+            throw exception;
+        }
+    }
+
+    public async getTimelineEventsCount(replayName : string) {
+        try {
+            return await this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).countDocuments();
         } catch (exception) {
             throw exception;
         }
@@ -109,10 +222,10 @@ class MongoDBHandler {
                 const startTime = collectionName.name.split('_')[0].replace('_', '');
                 const durationAndEndtime = await this.getDurationAndEndtime(collectionName.name, startTime);
                 const replayCollectionObject = {
-                    name: collectionName.name.replace(replayRecordsCollectionName, ''),
-                    startTime,
-                    endTime: durationAndEndtime.endtime,
-                    duration: durationAndEndtime.duration.milliseconds
+                    Name: collectionName.name.replace(replayRecordsCollectionName, ''),
+                    StartTime: startTime,
+                    EndTime: durationAndEndtime.Endtime,
+                    Duration: durationAndEndtime.Duration.milliseconds
                 }
                 replayCollectionsWithDuration.push(replayCollectionObject);
             }
@@ -128,15 +241,15 @@ class MongoDBHandler {
             const lastReplayRecordCursor = await this.mongoDBConnection.db(databaseName).collection(replayCollectionName).find({}, {
                 projection: {
                     _id: false,
-                    timestamp: true
+                    Timestamp: true
                 }
-            }).limit(1);
+            }).sort({Timestamp: -1}).limit(1);
             const lastReplayRecord = await lastReplayRecordCursor.next();
 
             if(lastReplayRecord === null) throw 'collection contains no record';
             const startTimeDateTime = DateTime.fromISO(startTime);
-            const endTimeDateTime = DateTime.fromISO(lastReplayRecord.timestamp);
-            return {duration: endTimeDateTime.diff(startTimeDateTime).toObject(), endtime: lastReplayRecord.timestamp};
+            const endTimeDateTime = DateTime.fromISO(lastReplayRecord.Timestamp);
+            return {Duration: endTimeDateTime.diff(startTimeDateTime).toObject(), Endtime: lastReplayRecord.Timestamp};
         } catch (exception) {
             throw exception;
         }
@@ -149,7 +262,7 @@ class MongoDBHandler {
      */
     public async retrieveReplays(gameObjectName : string, replayName : string) {
         try {
-            const result = this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({name: {$eq: gameObjectName}}).sort({starttime: 1});
+            const result = this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({Name: {$eq: gameObjectName}}).sort({Starttime: 1});
             return result.toArray();
         } catch (exception) {
             throw exception;
@@ -174,17 +287,17 @@ class MongoDBHandler {
                     $match: {
                         $or: [
                             {
-                                name: regEx
+                                Name: regEx
                             },
                             {
-                                tag: regEx
+                                Tag: regEx
                             }
                         ]
                     }
                 },
                 { $skip: (page - 1) * this.pageSize },
                 { $limit: this.pageSize },
-            ]).sort({starttime: timestampSorting});
+            ]).sort({Timestamp: timestampSorting});
             return result.toArray();
         } catch (exception) {
             throw exception;
@@ -204,10 +317,10 @@ class MongoDBHandler {
             const regEx = new RegExp('.*' + searchString + '.*');
             const documentsCount = await this.mongoDBConnection.db(databaseName).collection(replayRecordsCollectionName).countDocuments({$or: [
                     {
-                        name: regEx
+                        Name: regEx
                     },
                     {
-                        tag: regEx
+                        Tag: regEx
                     }
                 ]});
             return Math.floor(documentsCount / this.pageSize);

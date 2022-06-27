@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ReplaySystemBackend.iml" filepath="$PROJECT_DIR$/.idea/ReplaySystemBackend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ReplayBackend.iml" filepath="$PROJECT_DIR$/.idea/ReplayBackend.iml" />
     </modules>
   </component>
 </project>

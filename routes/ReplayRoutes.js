@@ -37,7 +37,7 @@ router.post('/setreplays', async(req, res) => {
 
 router.post('/getreplaycollectionobjects', async(req, res) => {
    try {
-       const userName = req.body.username;
+       const userName = req.body.userName;
        const replayCollectionObjects = await MongoDBHandler.getReplayCollectionObjects(userName);
        res.status(200).json(replayCollectionObjects);
    } catch (exception) {
@@ -84,7 +84,6 @@ router.post('/getreplayrecordsforcertaingameobject', async(req, res) => {
 router.post('/getreplayrecords', async(req, res) => {
     try {
         const replayName = req.body.replayName;
-
         const result = await MongoDBHandler.getReplayRecords(replayName);
         res.status(200).json(result);
     } catch (exception) {

@@ -43,12 +43,16 @@ var uri = process.env.MONGODB;
 var client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 var databaseName = process.env.MONGODBDATABASE;
 var replayRecordsCollectionName = process.env.REPLAYCOLLECTIONNAME;
+var audioRecordsCollectionName = process.env.AUDIOCOLLECTIONNAME;
+var animationRecordsCollectionName = process.env.ANIMATIONCOLLECTIONNAME;
 var timelineEventsCollectionName = process.env.TIMELINEEVENTSCOLLECTIONNAME;
 var DateTime = require("luxon").DateTime;
 var MongoDBHandler = /** @class */ (function () {
     function MongoDBHandler() {
         this.mongoDBConnection = null;
         this.pageSize = 20;
+        this.setIndices = false;
+        this.setTimelineIndices = false;
         if (this.mongoDBConnection === null || this.mongoDBConnection === undefined) {
             this.createMongoDBConnection();
         }
@@ -74,11 +78,62 @@ var MongoDBHandler = /** @class */ (function () {
             });
         });
     };
-    MongoDBHandler.prototype.createTimeLineEvent = function (timelineEvent) {
+    MongoDBHandler.prototype.createIndices = function (replayName) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 try {
-                    return [2 /*return*/, this.mongoDBConnection.db(databaseName).collection(timelineEvent.replayName + timelineEventsCollectionName).insertOne(timelineEvent)];
+                    if (this.setIndices)
+                        return [2 /*return*/];
+                    this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).createIndex({
+                        Timestamp: 1,
+                        Name: 1
+                    });
+                    this.mongoDBConnection.db(databaseName).collection(replayName + audioRecordsCollectionName).createIndex({
+                        Timestamp: 1,
+                        GameObjectName: 1
+                    });
+                    this.mongoDBConnection.db(databaseName).collection(replayName + animationRecordsCollectionName).createIndex({
+                        Timestamp: 1,
+                        GameObjectName: 1
+                    });
+                    this.setIndices = true;
+                }
+                catch (exception) {
+                    throw exception;
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    MongoDBHandler.prototype.createTimelineEventIndizes = function (replayName) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                try {
+                    if (this.setTimelineIndices)
+                        return [2 /*return*/];
+                    this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).createIndex({
+                        Starttime: 1
+                    });
+                    this.setTimelineIndices = true;
+                }
+                catch (exception) {
+                    throw exception;
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    MongoDBHandler.prototype.createTimeLineEvent = function (timelineEvent) {
+        return __awaiter(this, void 0, void 0, function () {
+            var replayName;
+            return __generator(this, function (_a) {
+                try {
+                    replayName = timelineEvent.ReplayName;
+                    if (this.setTimelineIndices) {
+                        this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).getIndexes());
+                        this.setIndices = false;
+                    }
+                    return [2 /*return*/, this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).insertOne(timelineEvent)];
                 }
                 catch (exception) {
                     throw exception;
@@ -95,7 +150,49 @@ var MongoDBHandler = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 try {
+                    if (this.setIndices) {
+                        this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).getIndexes());
+                        this.setIndices = false;
+                    }
                     return [2 /*return*/, this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).insertMany(replayRecords)];
+                }
+                catch (exception) {
+                    throw exception;
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    /**
+     * @param ReplayName
+     * @param AudioRecords
+     */
+    MongoDBHandler.prototype.addAudioRecords = function (ReplayName, AudioRecords) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                try {
+                    if (this.setIndices) {
+                        this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).getIndexes());
+                        this.setIndices = false;
+                    }
+                    return [2 /*return*/, this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).insertMany(AudioRecords)];
+                }
+                catch (exception) {
+                    throw exception;
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    MongoDBHandler.prototype.addAnimationRecords = function (ReplayName, AnimationRecords) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                try {
+                    if (this.setIndices) {
+                        this.mongoDBConnection.db(databaseName).collection(ReplayName + animationRecordsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(ReplayName + animationRecordsCollectionName).getIndexes());
+                        this.setIndices = false;
+                    }
+                    return [2 /*return*/, this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).insertMany(AnimationRecords)];
                 }
                 catch (exception) {
                     throw exception;
@@ -124,7 +221,7 @@ var MongoDBHandler = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find().sort({ timestamp: 1 }).toArray()];
+                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find().sort({ Timestamp: 1 }).toArray()];
                     case 1: return [2 /*return*/, _a.sent()];
                     case 2:
                         exception_2 = _a.sent();
@@ -134,62 +231,136 @@ var MongoDBHandler = /** @class */ (function () {
             });
         });
     };
-    MongoDBHandler.prototype.getReplayRecordBatch = function (replayName, batchSize, currentTimelineKnobPosition, name) {
+    MongoDBHandler.prototype.getAudioRecords = function (replayName, gameObjectName) {
         return __awaiter(this, void 0, void 0, function () {
-            var start, starttime, currentStart, currentEnd, exception_3;
+            var exception_3;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, this.createIndices(replayName)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + audioRecordsCollectionName).find({ GameObjectName: gameObjectName }).sort({ Timestamp: 1 }).toArray()];
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3:
+                        exception_3 = _a.sent();
+                        throw exception_3;
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    MongoDBHandler.prototype.getAnimationRecords = function (replayName, gameObjectName) {
+        return __awaiter(this, void 0, void 0, function () {
+            var exception_4;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, this.createIndices(replayName)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + animationRecordsCollectionName).find({ GameObjectName: gameObjectName }).sort({ Timestamp: 1 }).toArray()];
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3:
+                        exception_4 = _a.sent();
+                        throw exception_4;
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    MongoDBHandler.prototype.getReplayRecordBatch = function (replayName, batchSize, currentTimelineKnobPosition, name) {
+        return __awaiter(this, void 0, void 0, function () {
+            var start, starttime, currentStart, currentEnd, exception_5;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
                         start = Math.abs(Math.round(currentTimelineKnobPosition - batchSize / 2));
                         starttime = replayName.split('_')[0].replace('_', '');
                         currentStart = DateTime.fromISO(starttime).plus(start);
-                        currentEnd = DateTime.fromISO(starttime).plus(batchSize);
+                        currentEnd = currentStart.plus(batchSize);
+                        return [4 /*yield*/, this.createIndices(replayName)];
+                    case 1:
+                        _a.sent();
                         return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({
-                                name: name
-                            }).sort({ timestamp: 1 }).toArray()];
-                    case 1: return [2 /*return*/, _a.sent()];
-                    case 2:
-                        exception_3 = _a.sent();
-                        throw exception_3;
-                    case 3: return [2 /*return*/];
+                                Name: name,
+                                Timestamp: {
+                                    $gte: currentStart.toUTC().toString(),
+                                    $lte: currentEnd.toUTC().toString()
+                                }
+                            }).sort({ Timestamp: 1 }).toArray()];
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3:
+                        exception_5 = _a.sent();
+                        throw exception_5;
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
     MongoDBHandler.prototype.getReplayRecordsForCertainGameObject = function (replayName, name) {
         return __awaiter(this, void 0, void 0, function () {
-            var exception_4;
+            var exception_6;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({ name: name }).sort({ timestamp: 1 }).toArray()];
-                    case 1: return [2 /*return*/, _a.sent()];
-                    case 2:
-                        exception_4 = _a.sent();
-                        throw exception_4;
-                    case 3: return [2 /*return*/];
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, this.createIndices(replayName)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({ Name: name }).sort({ Timestamp: 1 }).toArray()];
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3:
+                        exception_6 = _a.sent();
+                        throw exception_6;
+                    case 4: return [2 /*return*/];
                 }
             });
         });
     };
     MongoDBHandler.prototype.getTimelineEvents = function (replayName) {
         return __awaiter(this, void 0, void 0, function () {
+            var exception_7;
             return __generator(this, function (_a) {
-                try {
-                    return [2 /*return*/, this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).find().sort({ starttime: 1 })];
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 3, , 4]);
+                        return [4 /*yield*/, this.createTimelineEventIndizes(replayName)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).find().sort({ Starttime: 1 }).toArray()];
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3:
+                        exception_7 = _a.sent();
+                        throw exception_7;
+                    case 4: return [2 /*return*/];
                 }
-                catch (exception) {
-                    throw exception;
+            });
+        });
+    };
+    MongoDBHandler.prototype.getTimelineEventsCount = function (replayName) {
+        return __awaiter(this, void 0, void 0, function () {
+            var exception_8;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).countDocuments()];
+                    case 1: return [2 /*return*/, _a.sent()];
+                    case 2:
+                        exception_8 = _a.sent();
+                        throw exception_8;
+                    case 3: return [2 /*return*/];
                 }
-                return [2 /*return*/];
             });
         });
     };
     MongoDBHandler.prototype.getReplayCollectionObjects = function (userName) {
         return __awaiter(this, void 0, void 0, function () {
-            var regEx, collectionNames, replayCollectionsWithDuration, i, collectionName, startTime, durationAndEndtime, replayCollectionObject, exception_5;
+            var regEx, collectionNames, replayCollectionsWithDuration, i, collectionName, startTime, durationAndEndtime, replayCollectionObject, exception_9;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -209,10 +380,10 @@ var MongoDBHandler = /** @class */ (function () {
                     case 3:
                         durationAndEndtime = _a.sent();
                         replayCollectionObject = {
-                            name: collectionName.name.replace(replayRecordsCollectionName, ''),
-                            startTime: startTime,
-                            endTime: durationAndEndtime.endtime,
-                            duration: durationAndEndtime.duration.milliseconds
+                            Name: collectionName.name.replace(replayRecordsCollectionName, ''),
+                            StartTime: startTime,
+                            EndTime: durationAndEndtime.Endtime,
+                            Duration: durationAndEndtime.Duration.milliseconds
                         };
                         replayCollectionsWithDuration.push(replayCollectionObject);
                         _a.label = 4;
@@ -221,8 +392,8 @@ var MongoDBHandler = /** @class */ (function () {
                         return [3 /*break*/, 2];
                     case 5: return [2 /*return*/, replayCollectionsWithDuration];
                     case 6:
-                        exception_5 = _a.sent();
-                        throw exception_5;
+                        exception_9 = _a.sent();
+                        throw exception_9;
                     case 7: return [2 /*return*/];
                 }
             });
@@ -230,7 +401,7 @@ var MongoDBHandler = /** @class */ (function () {
     };
     MongoDBHandler.prototype.getDurationAndEndtime = function (replayCollectionName, startTime) {
         return __awaiter(this, void 0, void 0, function () {
-            var lastReplayRecordCursor, lastReplayRecord, startTimeDateTime, endTimeDateTime, exception_6;
+            var lastReplayRecordCursor, lastReplayRecord, startTimeDateTime, endTimeDateTime, exception_10;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -238,9 +409,9 @@ var MongoDBHandler = /** @class */ (function () {
                         return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayCollectionName).find({}, {
                                 projection: {
                                     _id: false,
-                                    timestamp: true
+                                    Timestamp: true
                                 }
-                            }).limit(1)];
+                            }).sort({ Timestamp: -1 }).limit(1)];
                     case 1:
                         lastReplayRecordCursor = _a.sent();
                         return [4 /*yield*/, lastReplayRecordCursor.next()];
@@ -249,11 +420,11 @@ var MongoDBHandler = /** @class */ (function () {
                         if (lastReplayRecord === null)
                             throw 'collection contains no record';
                         startTimeDateTime = DateTime.fromISO(startTime);
-                        endTimeDateTime = DateTime.fromISO(lastReplayRecord.timestamp);
-                        return [2 /*return*/, { duration: endTimeDateTime.diff(startTimeDateTime).toObject(), endtime: lastReplayRecord.timestamp }];
+                        endTimeDateTime = DateTime.fromISO(lastReplayRecord.Timestamp);
+                        return [2 /*return*/, { Duration: endTimeDateTime.diff(startTimeDateTime).toObject(), Endtime: lastReplayRecord.Timestamp }];
                     case 3:
-                        exception_6 = _a.sent();
-                        throw exception_6;
+                        exception_10 = _a.sent();
+                        throw exception_10;
                     case 4: return [2 /*return*/];
                 }
             });
@@ -269,7 +440,7 @@ var MongoDBHandler = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 try {
-                    result = this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({ name: { $eq: gameObjectName } }).sort({ starttime: 1 });
+                    result = this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({ Name: { $eq: gameObjectName } }).sort({ Starttime: 1 });
                     return [2 /*return*/, result.toArray()];
                 }
                 catch (exception) {
@@ -307,17 +478,17 @@ var MongoDBHandler = /** @class */ (function () {
                             $match: {
                                 $or: [
                                     {
-                                        name: regEx
+                                        Name: regEx
                                     },
                                     {
-                                        tag: regEx
+                                        Tag: regEx
                                     }
                                 ]
                             }
                         },
                         { $skip: (page - 1) * this.pageSize },
                         { $limit: this.pageSize },
-                    ]).sort({ starttime: timestampSorting });
+                    ]).sort({ Timestamp: timestampSorting });
                     return [2 /*return*/, result.toArray()];
                 }
                 catch (exception) {
@@ -336,7 +507,7 @@ var MongoDBHandler = /** @class */ (function () {
     };
     MongoDBHandler.prototype.getPageMax = function (searchString) {
         return __awaiter(this, void 0, void 0, function () {
-            var regEx, documentsCount, exception_7;
+            var regEx, documentsCount, exception_11;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -344,18 +515,18 @@ var MongoDBHandler = /** @class */ (function () {
                         regEx = new RegExp('.*' + searchString + '.*');
                         return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayRecordsCollectionName).countDocuments({ $or: [
                                     {
-                                        name: regEx
+                                        Name: regEx
                                     },
                                     {
-                                        tag: regEx
+                                        Tag: regEx
                                     }
                                 ] })];
                     case 1:
                         documentsCount = _a.sent();
                         return [2 /*return*/, Math.floor(documentsCount / this.pageSize)];
                     case 2:
-                        exception_7 = _a.sent();
-                        throw exception_7;
+                        exception_11 = _a.sent();
+                        throw exception_11;
                     case 3: return [2 /*return*/];
                 }
             });

@@ -3,7 +3,21 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="e2ae66a8-4664-4766-904a-89158d444525" name="ReplayVM">
-        <fileTransfer rootFolder="/home/pi" accessType="SFTP" host="172.17.216.17" port="22" sshConfigId="ab32c72c-a482-45e1-b03a-0ddeb32fa845" sshConfig="pi@172.17.216.17:22 password">
+        <fileTransfer rootFolder="/home/pi" accessType="SFTP" host="141.28.73.25" port="12345" sshConfigId="b94bf6a3-bc80-4dd1-9969-045c4eca1e7f" sshConfig="florian@141.28.73.25:12345 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="8da9275c-34b0-4fe4-9952-9fe9174de5f3" name="BackendVM">
+        <fileTransfer rootFolder="/home/florain" accessType="SFTP" host="141.28.73.25" port="12345" sshConfigId="b94bf6a3-bc80-4dd1-9969-045c4eca1e7f" sshConfig="florian@141.28.73.25:12345 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="6ad8436c-f67e-42e4-b1c5-be2e703ec373" name="MongoDBVM">
+        <fileTransfer rootFolder="/home/florian" accessType="SFTP" host="141.28.73.24" port="12345" sshConfigId="2f2f8778-1bba-451d-92cc-c85057a5429c" sshConfig="florian@141.28.73.24:12345 password">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
