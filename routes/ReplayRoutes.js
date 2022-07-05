@@ -1,7 +1,10 @@
 const express = require('express');
 const ReplayBuilder = require("../ReplayBuilder.js");
 const MongoDBHandler = require("../database/MongoDBHandler.js");
+const messagePackToJSONDeserializer = require("../MessagePackToJSONDeserializer");
 const router = express.Router();
+const {Decoder} = require("@msgpack/msgpack");
+const decoder = new Decoder();
 
 router.get('/', async(req, res) => {
     try {
@@ -25,8 +28,19 @@ router.post('/createtimelineevent', async(req, res) => {
 
 router.post('/setreplays', async(req, res) => {
     try {
-        const replayName = req.body.replayName;
-        const replayRecords = req.body.replayRecords;
+        let replayName;
+        let replayRecords;
+        console.log(req.body)
+
+        if(req.body.isArray()) {
+            const decodedMSG = decoder.decode(msg);
+            const deserializedMSG = messagePackToJSONDeserializer.deserializeMessage(decodedMSG);
+            replayName = deserializedMSG.ReplayName;
+            replayRecords = deserializedMSG.ReplayRecords;
+        } else {
+            replayName = req.body.ReplayName;
+            replayRecords = req.body.ReplayRecords;
+        }
         await MongoDBHandler.addReplayRecords(replayName, replayRecords);
         res.status(200);
     } catch (exception) {
@@ -39,6 +53,7 @@ router.post('/getreplaycollectionobjects', async(req, res) => {
    try {
        const userName = req.body.userName;
        const replayCollectionObjects = await MongoDBHandler.getReplayCollectionObjects(userName);
+       // console.log(replayCollectionObjects);
        res.status(200).json(replayCollectionObjects);
    } catch (exception) {
        handleException(res, exception);
@@ -105,7 +120,6 @@ router.get('/gettimelineevents', async(req, res) => {
 router.get('/replays', async(req, res) => {
     try {
         const name = req.query.name;
-        const result = await MongoDBHandler.retrieveReplays(name);
         res.json(result);
     } catch (exception) {
         handleException(res, exception);

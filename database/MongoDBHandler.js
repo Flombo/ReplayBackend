@@ -88,14 +88,6 @@ var MongoDBHandler = /** @class */ (function () {
                         Timestamp: 1,
                         Name: 1
                     });
-                    this.mongoDBConnection.db(databaseName).collection(replayName + audioRecordsCollectionName).createIndex({
-                        Timestamp: 1,
-                        GameObjectName: 1
-                    });
-                    this.mongoDBConnection.db(databaseName).collection(replayName + animationRecordsCollectionName).createIndex({
-                        Timestamp: 1,
-                        GameObjectName: 1
-                    });
                     this.setIndices = true;
                 }
                 catch (exception) {
@@ -112,7 +104,7 @@ var MongoDBHandler = /** @class */ (function () {
                     if (this.setTimelineIndices)
                         return [2 /*return*/];
                     this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).createIndex({
-                        Starttime: 1
+                        StartTime: 1
                     });
                     this.setTimelineIndices = true;
                 }
@@ -286,7 +278,7 @@ var MongoDBHandler = /** @class */ (function () {
                     case 1:
                         _a.sent();
                         return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({
-                                Name: name,
+                                GameObjectName: name,
                                 Timestamp: {
                                     $gte: currentStart.toUTC().toString(),
                                     $lte: currentEnd.toUTC().toString()
@@ -311,7 +303,7 @@ var MongoDBHandler = /** @class */ (function () {
                         return [4 /*yield*/, this.createIndices(replayName)];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({ Name: name }).sort({ Timestamp: 1 }).toArray()];
+                        return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({ GameObjectName: name }).sort({ Timestamp: 1 }).toArray()];
                     case 2: return [2 /*return*/, _a.sent()];
                     case 3:
                         exception_6 = _a.sent();
@@ -365,7 +357,7 @@ var MongoDBHandler = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 6, , 7]);
-                        regEx = new RegExp('.*' + userName + '_records.*');
+                        regEx = new RegExp('.*' + userName + replayRecordsCollectionName + '.*');
                         return [4 /*yield*/, this.mongoDBConnection.db(databaseName).listCollections({ name: { $regex: regEx } }, { nameOnly: true }).toArray()];
                     case 1:
                         collectionNames = _a.sent();
@@ -382,7 +374,7 @@ var MongoDBHandler = /** @class */ (function () {
                         replayCollectionObject = {
                             Name: collectionName.name.replace(replayRecordsCollectionName, ''),
                             StartTime: startTime,
-                            EndTime: durationAndEndtime.Endtime,
+                            EndTime: durationAndEndtime.EndTime,
                             Duration: durationAndEndtime.Duration.milliseconds
                         };
                         replayCollectionsWithDuration.push(replayCollectionObject);
@@ -421,7 +413,7 @@ var MongoDBHandler = /** @class */ (function () {
                             throw 'collection contains no record';
                         startTimeDateTime = DateTime.fromISO(startTime);
                         endTimeDateTime = DateTime.fromISO(lastReplayRecord.Timestamp);
-                        return [2 /*return*/, { Duration: endTimeDateTime.diff(startTimeDateTime).toObject(), Endtime: lastReplayRecord.Timestamp }];
+                        return [2 /*return*/, { Duration: endTimeDateTime.diff(startTimeDateTime).toObject(), EndTime: lastReplayRecord.Timestamp }];
                     case 3:
                         exception_10 = _a.sent();
                         throw exception_10;
@@ -440,7 +432,7 @@ var MongoDBHandler = /** @class */ (function () {
             var result;
             return __generator(this, function (_a) {
                 try {
-                    result = this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({ Name: { $eq: gameObjectName } }).sort({ Starttime: 1 });
+                    result = this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).find({ GameObjectName: { $eq: gameObjectName } }).sort({ Starttime: 1 });
                     return [2 /*return*/, result.toArray()];
                 }
                 catch (exception) {
@@ -478,7 +470,7 @@ var MongoDBHandler = /** @class */ (function () {
                             $match: {
                                 $or: [
                                     {
-                                        Name: regEx
+                                        GameObjectName: regEx
                                     },
                                     {
                                         Tag: regEx
@@ -515,7 +507,7 @@ var MongoDBHandler = /** @class */ (function () {
                         regEx = new RegExp('.*' + searchString + '.*');
                         return [4 /*yield*/, this.mongoDBConnection.db(databaseName).collection(replayRecordsCollectionName).countDocuments({ $or: [
                                     {
-                                        Name: regEx
+                                        GameObjectName: regEx
                                     },
                                     {
                                         Tag: regEx

@@ -17,7 +17,21 @@
         </fileTransfer>
       </webServer>
       <webServer id="6ad8436c-f67e-42e4-b1c5-be2e703ec373" name="MongoDBVM">
-        <fileTransfer rootFolder="/home/florian" accessType="SFTP" host="141.28.73.24" port="12345" sshConfigId="2f2f8778-1bba-451d-92cc-c85057a5429c" sshConfig="florian@141.28.73.24:12345 password">
+        <fileTransfer rootFolder="/home/florian" accessType="SFTP" host="141.28.73.17" port="22" sshConfigId="2f2f8778-1bba-451d-92cc-c85057a5429c" sshConfig="florian@141.28.73.17:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="d28b5db8-69de-45cf-a19c-8b95b9212078" name="BackendNew1">
+        <fileTransfer rootFolder="/home/florian" accessType="SFTP" host="141.28.73.17" port="22" sshConfigId="2f2f8778-1bba-451d-92cc-c85057a5429c" sshConfig="florian@141.28.73.17:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="fcb3425f-1058-4608-8b73-0a8a03b43d84" name="BackendNew2">
+        <fileTransfer rootFolder="/home/florian" accessType="SFTP" host="141.28.73.16" port="22" sshConfigId="8c5d68ec-ea0e-4840-ac11-59f80ff548db" sshConfig="florian@141.28.73.16:22 password">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>

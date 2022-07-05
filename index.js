@@ -11,7 +11,7 @@ const replayRoutes = require('./routes/ReplayRoutes.js');
 const WebSocket = require('ws');
 const MongoDBHandler = require("./database/MongoDBHandler");
 const wss = new WebSocket.Server({
-    port: 800 + process.env.NODE_APP_INSTANCE
+    port: 8000
 });
 const {Decoder} = require("@msgpack/msgpack");
 const messagePackToJSONDeserializer = require('./MessagePackToJSONDeserializer.js');
@@ -21,6 +21,11 @@ wss.on('connection', function(socket) {
     socket.on('message', async (msg) =>  {
         const decodedMSG = decoder.decode(msg);
         const deserializedMSG = messagePackToJSONDeserializer.deserializeMessage(decodedMSG);
+
+        if(deserializedMSG.MessageType === "createtimelineevent") {
+            console.log(deserializedMSG)
+        }
+
         await checkMessageType(deserializedMSG, socket)
     });
 
@@ -30,7 +35,6 @@ wss.on('connection', function(socket) {
 
     //When a socket closes, or disconnects, remove it from the array.
     socket.on('close', function() {
-        console.log('closed')
         socket.close();
     });
 });
@@ -39,13 +43,14 @@ async function checkMessageType(parsedMSG, socket) {
     switch (parsedMSG.MessageType) {
         case "getreplaybatch":
             try {
-                const result = await MongoDBHandler.getReplayRecordsForCertainGameObject(
+                let result = await MongoDBHandler.getReplayRecordsForCertainGameObject(
                     parsedMSG.ReplayName,
                     parsedMSG.Name
                 );
                 if (result !== null && result.length > 0) {
-                    socket.send({message: "replayrecords", result}, true);
+                    socket.send(JSON.stringify(result), true);
                 }
+                result = null;
             } catch (exception) {
                 console.log(exception)
                 socket.send(exception.message);
@@ -122,12 +127,13 @@ async function checkMessageType(parsedMSG, socket) {
             break;
         case "gettimelineevents":
             try {
-                const result = await MongoDBHandler.getTimelineEvents(
+                let result = await MongoDBHandler.getTimelineEvents(
                     parsedMSG.ReplayName
                 );
                 if (result !== null) {
                     socket.send(JSON.stringify(result), true);
                 }
+                result = null;
             } catch (exception) {
                 console.log(exception)
                 socket.send(exception.message);

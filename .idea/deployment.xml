@@ -3,6 +3,20 @@
   <component name="PublishConfigData" serverName="ReplayVM" exclude=".svn;.cvs;.idea;.DS_Store;.git;.hg;*.hprof;*.pyc;.scss;.css.map;.ts" filePermissions="420" folderPermissions="493" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
+      <paths name="BackendNew1">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Backend" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="BackendNew2">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Backend" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="BackendVM">
         <serverdata>
           <mappings>
