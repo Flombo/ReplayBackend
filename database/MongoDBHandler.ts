@@ -63,10 +63,13 @@ class MongoDBHandler {
         try {
             const replayName = timelineEvent.ReplayName;
             if(this.setTimelineIndices) {
-                this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).dropIndexes(
-                    this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).getIndexes()
-                );
-                this.setIndices = false;
+                const collection = this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName);
+                if(collection !== undefined && collection !== null) {
+                    this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).dropIndexes(
+                        this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).getIndexes()
+                    );
+                    this.setIndices = false;
+                }
             }
             return this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).insertOne(timelineEvent);
         } catch (exception) {
@@ -81,8 +84,15 @@ class MongoDBHandler {
     public async addReplayRecords(replayName : string, replayRecords: []) {
         try {
             if(this.setIndices) {
-                this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).getIndexes());
-                this.setIndices = false;
+                const collection = this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName);
+                if(collection !== undefined && collection !== null) {
+                    this.mongoDBConnection.db(databaseName)
+                        .collection(replayName + replayRecordsCollectionName)
+                        .dropIndexes(
+                            this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).getIndexes()
+                        );
+                    this.setIndices = false;
+                }
             }
             return this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).insertMany(replayRecords);
         } catch (exception) {
