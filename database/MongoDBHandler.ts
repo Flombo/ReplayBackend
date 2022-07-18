@@ -62,16 +62,7 @@ class MongoDBHandler {
     public async createTimeLineEvent(timelineEvent) {
         try {
             const replayName = timelineEvent.ReplayName;
-            if(this.setTimelineIndices) {
-                const collection = this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName);
-                if(collection !== undefined && collection !== null) {
-                    this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).dropIndexes(
-                        this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).getIndexes()
-                    );
-                    this.setIndices = false;
-                }
-            }
-            return this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).insertOne(timelineEvent);
+            return this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).insertMany(timelineEvent);
         } catch (exception) {
             throw exception;
         }
@@ -83,17 +74,6 @@ class MongoDBHandler {
      */
     public async addReplayRecords(replayName : string, replayRecords: []) {
         try {
-            if(this.setIndices) {
-                const collection = this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName);
-                if(collection !== undefined && collection !== null) {
-                    this.mongoDBConnection.db(databaseName)
-                        .collection(replayName + replayRecordsCollectionName)
-                        .dropIndexes(
-                            this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).getIndexes()
-                        );
-                    this.setIndices = false;
-                }
-            }
             return this.mongoDBConnection.db(databaseName).collection(replayName + replayRecordsCollectionName).insertMany(replayRecords);
         } catch (exception) {
             throw exception;
@@ -106,10 +86,6 @@ class MongoDBHandler {
      */
     public async addAudioRecords(ReplayName: any, AudioRecords: []) {
         try {
-            if(this.setIndices) {
-                this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).getIndexes());
-                this.setIndices = false;
-            }
             return this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).insertMany(AudioRecords);
         } catch (exception) {
             throw exception;
@@ -118,10 +94,6 @@ class MongoDBHandler {
 
     public async addAnimationRecords(ReplayName: any, AnimationRecords: any[]) {
         try {
-            if(this.setIndices) {
-                this.mongoDBConnection.db(databaseName).collection(ReplayName + animationRecordsCollectionName).dropIndexes(this.mongoDBConnection.db(databaseName).collection(ReplayName + animationRecordsCollectionName).getIndexes());
-                this.setIndices = false;
-            }
             return this.mongoDBConnection.db(databaseName).collection(ReplayName + audioRecordsCollectionName).insertMany(AnimationRecords);
         } catch (exception) {
             throw exception;
