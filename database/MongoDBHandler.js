@@ -60,7 +60,7 @@ class MongoDBHandler {
     async createTimeLineEvent(timelineEvent) {
         try {
             const replayName = timelineEvent.ReplayName;
-            return this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).insertMany(timelineEvent);
+            return this.mongoDBConnection.db(databaseName).collection(replayName + timelineEventsCollectionName).insertOne(timelineEvent);
         } catch (exception) {
             throw exception;
         }
