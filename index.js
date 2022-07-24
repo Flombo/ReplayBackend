@@ -21,11 +21,6 @@ wss.on('connection', function(socket) {
     socket.on('message', async (msg) =>  {
         const decodedMSG = decoder.decode(msg);
         const deserializedMSG = messagePackToJSONDeserializer.deserializeMessage(decodedMSG);
-
-        if(deserializedMSG.MessageType === "createtimelineevent") {
-            console.log(deserializedMSG)
-        }
-
         await checkMessageType(deserializedMSG, socket)
     });
 
